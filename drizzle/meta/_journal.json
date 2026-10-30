@@ -15,6 +15,13 @@
       "when": 1793346525252,
       "tag": "0001_people",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793391428805,
+      "tag": "0002_gift_ideas",
+      "breakpoints": true
     }
   ]
 }

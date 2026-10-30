@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DeletePersonButton } from "@/components/DeletePersonButton";
+import { DeleteButton } from "@/components/DeleteButton";
+import { IdeaCard } from "@/components/IdeaCard";
+import { listIdeasForPerson } from "@/db/queries/gift-ideas";
 import { getPerson } from "@/db/queries/people";
 import { requireUser } from "@/lib/auth";
 import { formatBirthday, formatMoney, splitInterests } from "@/lib/format";
@@ -16,6 +18,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
   if (!person) notFound();
 
   const interests = splitInterests(person.interests);
+  const ideas = await listIdeasForPerson(user.id, person.id);
 
   return (
     <div className="pt-6">
@@ -32,7 +35,12 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
           </div>
           <div className="flex gap-3">
             <Link href={`/people/${person.id}/edit`} className="btn-plain">Edit</Link>
-            <DeletePersonButton name={person.name} action={deletePersonAction.bind(null, person.id)} />
+            <DeleteButton
+              name={person.name}
+              keepLabel="Keep them"
+              warning="Their gift ideas will go too."
+              action={deletePersonAction.bind(null, person.id)}
+            />
           </div>
         </div>
 
@@ -69,6 +77,22 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
           </div>
         )}
       </div>
+
+      <section className="mt-10">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 className="font-display text-3xl font-extrabold tracking-tight">Gift ideas</h2>
+          <Link href={`/ideas/new?person=${person.id}`} className="btn-pink">Add an idea 💡</Link>
+        </div>
+        {ideas.length === 0 ? (
+          <p className="mt-4 text-ink/70">Nothing saved for {person.name} yet. What have they been hinting at?</p>
+        ) : (
+          <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {ideas.map((row) => (
+              <li key={row.idea.id}><IdeaCard row={row} /></li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

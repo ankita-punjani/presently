@@ -72,3 +72,36 @@ export const people = pgTable("people", {
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+// Shared, seeded list (see drizzle/0002_gift_ideas.sql). One category has many ideas.
+export const categories = pgTable("categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: text("name").notNull().unique(),
+  emoji: text("emoji").notNull(),
+});
+
+// The main item. One person has many ideas. userId is stored here too so every
+// query can filter by owner directly.
+export const giftIdeas = pgTable("gift_ideas", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  personId: integer("person_id")
+    .notNull()
+    .references(() => people.id, { onDelete: "cascade" }),
+  categoryId: integer("category_id")
+    .notNull()
+    .references(() => categories.id, { onDelete: "restrict" }),
+  title: text("title").notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }),
+  link: text("link"),
+  imageUrl: text("image_url"),
+  store: text("store"),
+  status: text("status").notNull().default("idea"),
+  occasion: text("occasion").notNull().default("birthday"),
+  source: text("source").notNull().default("manual"),
+  boughtOn: date("bought_on"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});

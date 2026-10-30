@@ -19,6 +19,9 @@ export async function NavBar() {
           <Link href="/people" className="hover:text-pink">
             People
           </Link>
+          <Link href="/ideas" className="hover:text-pink">
+            Ideas
+          </Link>
           <LogOutButton />
         </nav>
       ) : (
