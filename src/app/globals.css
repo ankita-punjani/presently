@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-cream: #fff8ee;
+  --color-pink: #ff4f9a;
+  --color-tangerine: #ff8a3d;
+  --color-lime: #c6f432;
+  --color-lilac: #b9a6ff;
+  --color-ink: #1a1a1a;
+  --font-display: var(--font-bricolage);
+  --font-sans: var(--font-dm-sans);
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+/* Chunky "sticker" card: thick outline + hard offset shadow. */
+@utility sticker {
+  @apply rounded-2xl border-2 border-ink bg-white shadow-[4px_4px_0_0_var(--color-ink)];
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-ink px-5 py-2.5 font-semibold
+    shadow-[3px_3px_0_0_var(--color-ink)] transition
+    hover:-translate-y-0.5 hover:shadow-[4px_5px_0_0_var(--color-ink)]
+    active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
+    disabled:cursor-wait disabled:opacity-60;
+}
+@utility btn-pink {
+  @apply btn bg-pink text-white;
+}
+@utility btn-plain {
+  @apply btn bg-white text-ink;
+}
+
+@utility field {
+  @apply w-full rounded-xl border-2 border-ink bg-white px-4 py-2.5 outline-none
+    placeholder:text-ink/40 focus:shadow-[3px_3px_0_0_var(--color-pink)];
+}
+@utility field-error {
+  @apply border-pink;
+}
+@utility label {
+  @apply mb-1 block text-sm font-semibold;
+}
