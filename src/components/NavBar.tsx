@@ -16,6 +16,9 @@ export async function NavBar() {
           <Link href="/dashboard" className="hidden hover:text-pink sm:inline">
             Dashboard
           </Link>
+          <Link href="/people" className="hover:text-pink">
+            People
+          </Link>
           <LogOutButton />
         </nav>
       ) : (
