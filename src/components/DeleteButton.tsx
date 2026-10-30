@@ -5,10 +5,12 @@ import { SubmitButton } from "./SubmitButton";
 
 type Props = {
   name: string;
+  keepLabel: string;
+  warning?: string;
   action: () => Promise<void>;
 };
 
-export function DeletePersonButton({ name, action }: Props) {
+export function DeleteButton({ name, keepLabel, warning, action }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
 
   return (
@@ -24,13 +26,13 @@ export function DeletePersonButton({ name, action }: Props) {
       >
         <p className="text-4xl" aria-hidden>🗑️</p>
         <h2 id="delete-title" className="mt-2 font-display text-2xl font-bold">Delete {name}?</h2>
-        <p className="mt-1 text-ink/70">Are you sure? This can’t be undone.</p>
+        <p className="mt-1 text-ink/70">Are you sure? {warning} This can’t be undone.</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <form action={action}>
             <SubmitButton label="Yes, delete" pendingLabel="Deleting…" />
           </form>
           <button type="button" onClick={() => dialog.current?.close()} className="btn-plain">
-            Keep them
+            {keepLabel}
           </button>
         </div>
       </dialog>
