@@ -133,3 +133,12 @@ export const budgets = pgTable("budgets", {
   endDate: date("end_date").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+// One row per AI quiz run, so each user can be limited per day to protect the free tier.
+export const quizRuns = pgTable("quiz_runs", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});

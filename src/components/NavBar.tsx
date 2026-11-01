@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/ideas", label: "Ideas" },
   { href: "/starred", label: "Starred" },
   { href: "/budgets", label: "Budgets" },
+  { href: "/quiz", label: "Gift quiz 🔮" },
 ];
 
 export async function NavBar() {

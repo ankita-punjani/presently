@@ -6,7 +6,8 @@ import { daysUntilBirthday } from "@/lib/dates";
 export type IdeaInput = Pick<
   typeof giftIdeas.$inferInsert,
   "personId" | "categoryId" | "title" | "price" | "link" | "store" | "status" | "occasion" | "boughtOn" | "notes"
->;
+> &
+  Partial<Pick<typeof giftIdeas.$inferInsert, "imageUrl" | "source">>;
 
 const ideaWithNames = {
   idea: giftIdeas,
