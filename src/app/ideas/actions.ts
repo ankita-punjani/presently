@@ -7,6 +7,7 @@ import {
   createIdea,
   deleteIdea,
   getIdea,
+  setStar,
   updateIdea,
   type IdeaInput,
 } from "@/db/queries/gift-ideas";
@@ -75,4 +76,10 @@ export async function deleteIdeaAction(id: number) {
   await deleteIdea(user.id, id);
   revalidatePath("/ideas");
   redirect("/ideas");
+}
+
+export async function setStarAction(id: number, starred: boolean) {
+  const user = await requireUser();
+  await setStar(user.id, id, starred);
+  revalidatePath("/", "layout");
 }
