@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/DeleteButton";
+import { StarButton } from "@/components/StarButton";
 import { StatusPill } from "@/components/StatusPill";
 import { getIdea } from "@/db/queries/gift-ideas";
 import { requireUser } from "@/lib/auth";
@@ -30,7 +31,8 @@ export default async function IdeaPage({ params }: { params: Promise<{ id: strin
             <p className="mt-1 text-ink/70">For {personName} · {categoryName}</p>
             <div className="mt-3"><StatusPill status={idea.status} /></div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
+            <StarButton ideaId={idea.id} title={idea.title} starred={row.starred} />
             <Link href={`/ideas/${idea.id}/edit`} className="btn-plain">Edit</Link>
             <DeleteButton name={idea.title} keepLabel="Keep it" action={deleteIdeaAction.bind(null, idea.id)} />
           </div>

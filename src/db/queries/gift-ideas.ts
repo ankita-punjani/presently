@@ -1,6 +1,6 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { categories, giftIdeas, people } from "@/db/schema";
+import { categories, giftIdeas, people, stars } from "@/db/schema";
 
 export type IdeaInput = Pick<
   typeof giftIdeas.$inferInsert,
@@ -12,14 +12,16 @@ const ideaWithNames = {
   personName: people.name,
   categoryName: categories.name,
   categoryEmoji: categories.emoji,
+  starred: sql<boolean>`${stars.giftIdeaId} is not null`,
 };
 
-function selectIdeas() {
+function selectIdeas(userId: string) {
   return db
     .select(ideaWithNames)
     .from(giftIdeas)
     .innerJoin(people, eq(giftIdeas.personId, people.id))
-    .innerJoin(categories, eq(giftIdeas.categoryId, categories.id));
+    .innerJoin(categories, eq(giftIdeas.categoryId, categories.id))
+    .leftJoin(stars, and(eq(stars.giftIdeaId, giftIdeas.id), eq(stars.userId, userId)));
 }
 
 export type IdeaRow = Awaited<ReturnType<typeof selectIdeas>>[number];
@@ -34,17 +36,23 @@ export async function categoryExists(id: number) {
 }
 
 export function listIdeas(userId: string) {
-  return selectIdeas().where(eq(giftIdeas.userId, userId)).orderBy(desc(giftIdeas.createdAt));
+  return selectIdeas(userId).where(eq(giftIdeas.userId, userId)).orderBy(desc(giftIdeas.createdAt));
 }
 
 export function listIdeasForPerson(userId: string, personId: number) {
-  return selectIdeas()
+  return selectIdeas(userId)
     .where(and(eq(giftIdeas.userId, userId), eq(giftIdeas.personId, personId)))
     .orderBy(desc(giftIdeas.createdAt));
 }
 
+export function listStarred(userId: string) {
+  return selectIdeas(userId)
+    .where(and(eq(giftIdeas.userId, userId), isNotNull(stars.giftIdeaId)))
+    .orderBy(desc(stars.createdAt));
+}
+
 export async function getIdea(userId: string, id: number) {
-  const [row] = await selectIdeas().where(and(eq(giftIdeas.id, id), eq(giftIdeas.userId, userId)));
+  const [row] = await selectIdeas(userId).where(and(eq(giftIdeas.id, id), eq(giftIdeas.userId, userId)));
   return row ?? null;
 }
 
@@ -78,4 +86,14 @@ export async function updateIdea(userId: string, id: number, input: IdeaInput) {
 
 export async function deleteIdea(userId: string, id: number) {
   await db.delete(giftIdeas).where(and(eq(giftIdeas.id, id), eq(giftIdeas.userId, userId)));
+}
+
+export async function setStar(userId: string, giftIdeaId: number, starred: boolean) {
+  if (!starred) {
+    await db.delete(stars).where(and(eq(stars.userId, userId), eq(stars.giftIdeaId, giftIdeaId)));
+    return;
+  }
+  if (await getIdea(userId, giftIdeaId)) {
+    await db.insert(stars).values({ userId, giftIdeaId }).onConflictDoNothing();
+  }
 }

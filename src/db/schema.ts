@@ -1,4 +1,4 @@
-import { boolean, date, integer, numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, date, integer, numeric, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
 
 // Login tables. Column names follow what Better Auth expects; table names are
 // plural (see `usePlural` in src/lib/auth.ts) so `users` matches PLAN.md.
@@ -105,3 +105,18 @@ export const giftIdeas = pgTable("gift_ideas", {
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+// Junction table: one row means "this user starred this idea". One table for everyone.
+export const stars = pgTable(
+  "stars",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    giftIdeaId: integer("gift_idea_id")
+      .notNull()
+      .references(() => giftIdeas.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.giftIdeaId] })],
+);
