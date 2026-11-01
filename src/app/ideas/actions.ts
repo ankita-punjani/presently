@@ -12,6 +12,7 @@ import {
   type IdeaInput,
 } from "@/db/queries/gift-ideas";
 import { requireUser } from "@/lib/auth";
+import { todayString } from "@/lib/dates";
 import { OCCASIONS, STATUSES } from "@/lib/idea-options";
 import { cleanLink, readValues, validateIdea, type FormState } from "@/lib/validation";
 
@@ -31,7 +32,7 @@ function toInput(values: FormState["values"], previousBoughtOn: string | null): 
     status,
     occasion: OCCASIONS.includes(values.occasion) ? values.occasion : "birthday",
     // Spending stats count from this date: set once on purchase, cleared if undone.
-    boughtOn: status === "idea" ? null : (previousBoughtOn ?? new Date().toISOString().slice(0, 10)),
+    boughtOn: status === "idea" ? null : (previousBoughtOn ?? todayString()),
     notes: values.notes || null,
   };
 }
