@@ -1,3 +1,4 @@
+import { todayString } from "./dates";
 import { parseId } from "./params";
 
 export type FormState = {
@@ -29,9 +30,8 @@ function checkBirthday(errors: FormState["errors"], value: string) {
   if (!value) return;
   const parsed = new Date(`${value}T00:00:00Z`);
   const isRealDate = /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(parsed.getTime());
-  const today = new Date().toISOString().slice(0, 10);
   if (!isRealDate || parsed.getUTCFullYear() < 1900) errors.birthday = "That date doesn’t look right. Check the year?";
-  else if (value > today) errors.birthday = "Birthdays can’t be in the future. Time traveler? 🕰️";
+  else if (value > todayString()) errors.birthday = "Birthdays can’t be in the future. Time traveler? 🕰️";
 }
 
 // Links become clickable buttons, so only allow web addresses. This blocks things

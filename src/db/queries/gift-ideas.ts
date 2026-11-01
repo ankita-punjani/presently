@@ -1,6 +1,7 @@
-import { and, asc, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, isNotNull, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { categories, giftIdeas, people, stars } from "@/db/schema";
+import { daysUntilBirthday } from "@/lib/dates";
 
 export type IdeaInput = Pick<
   typeof giftIdeas.$inferInsert,
@@ -10,6 +11,7 @@ export type IdeaInput = Pick<
 const ideaWithNames = {
   idea: giftIdeas,
   personName: people.name,
+  personBirthday: people.birthday,
   categoryName: categories.name,
   categoryEmoji: categories.emoji,
   starred: sql<boolean>`${stars.giftIdeaId} is not null`,
@@ -35,8 +37,42 @@ export async function categoryExists(id: number) {
   return Boolean(row);
 }
 
-export function listIdeas(userId: string) {
-  return selectIdeas(userId).where(eq(giftIdeas.userId, userId)).orderBy(desc(giftIdeas.createdAt));
+export type IdeaFilters = {
+  q?: string;
+  personId?: number;
+  categoryId?: number;
+  status?: string;
+  sort?: string;
+};
+
+const ORDER = {
+  newest: [desc(giftIdeas.createdAt)],
+  "price-low": [sql`${giftIdeas.price} asc nulls last`, desc(giftIdeas.createdAt)],
+  "price-high": [sql`${giftIdeas.price} desc nulls last`, desc(giftIdeas.createdAt)],
+};
+
+export async function listIdeas(userId: string, filters: IdeaFilters = {}) {
+  const { q, personId, categoryId, status, sort } = filters;
+  // Escape so a search for "50%" means the text, not a wildcard.
+  const pattern = q && `%${q.replace(/[\\%_]/g, "\\$&")}%`;
+
+  const rows = await selectIdeas(userId)
+    .where(
+      and(
+        eq(giftIdeas.userId, userId),
+        pattern ? or(ilike(giftIdeas.title, pattern), ilike(giftIdeas.store, pattern), ilike(giftIdeas.notes, pattern)) : undefined,
+        personId ? eq(giftIdeas.personId, personId) : undefined,
+        categoryId ? eq(giftIdeas.categoryId, categoryId) : undefined,
+        status ? eq(giftIdeas.status, status) : undefined,
+      ),
+    )
+    .orderBy(...(ORDER[sort as keyof typeof ORDER] ?? ORDER.newest));
+
+  if (sort !== "birthday") return rows;
+  // "Soonest" depends on today's date, so it's easiest to sort here.
+  const days = (row: IdeaRow) =>
+    row.personBirthday ? daysUntilBirthday(row.personBirthday) : Number.POSITIVE_INFINITY;
+  return rows.toSorted((a, b) => days(a) - days(b));
 }
 
 export function listIdeasForPerson(userId: string, personId: number) {
