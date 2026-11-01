@@ -90,7 +90,10 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
       <section className="mt-10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h2 className="font-display text-3xl font-extrabold tracking-tight">Gift ideas</h2>
-          <Link href={`/ideas/new?person=${person.id}`} className="btn-pink">Add an idea 💡</Link>
+          <div className="flex flex-wrap gap-3">
+            <Link href={`/quiz?person=${person.id}`} className="btn-pink">Find a gift 🔮</Link>
+            <Link href={`/ideas/new?person=${person.id}`} className="btn-plain">Add an idea 💡</Link>
+          </div>
         </div>
         {ideas.length === 0 ? (
           <p className="mt-4 text-ink/70">Nothing saved for {person.name} yet. What have they been hinting at?</p>
