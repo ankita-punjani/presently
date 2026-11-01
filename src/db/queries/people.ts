@@ -1,6 +1,7 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, count, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { people } from "@/db/schema";
+import { giftIdeas, people } from "@/db/schema";
+import { daysUntilBirthday } from "@/lib/dates";
 
 export type Person = typeof people.$inferSelect;
 export type PersonInput = Pick<
@@ -13,6 +14,27 @@ export type PersonInput = Pick<
 
 export function listPeople(userId: string) {
   return db.select().from(people).where(eq(people.userId, userId)).orderBy(asc(people.name));
+}
+
+export type UpcomingBirthday = { id: number; name: string; days: number; birthday: string; ideaCount: number };
+
+// Soonest first. ideaCount only counts ideas still waiting to be bought.
+export async function listUpcomingBirthdays(userId: string): Promise<UpcomingBirthday[]> {
+  const rows = await db
+    .select({
+      id: people.id,
+      name: people.name,
+      birthday: people.birthday,
+      ideaCount: sql<number>`${count(giftIdeas.id)}::int`,
+    })
+    .from(people)
+    .leftJoin(giftIdeas, and(eq(giftIdeas.personId, people.id), eq(giftIdeas.status, "idea")))
+    .where(and(eq(people.userId, userId), isNotNull(people.birthday)))
+    .groupBy(people.id);
+
+  return rows
+    .map((row) => ({ ...row, birthday: row.birthday!, days: daysUntilBirthday(row.birthday!) }))
+    .sort((a, b) => a.days - b.days);
 }
 
 export async function getPerson(userId: string, id: number) {

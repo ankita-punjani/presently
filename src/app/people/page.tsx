@@ -1,13 +1,17 @@
 import Link from "next/link";
+import { BirthdayChip } from "@/components/BirthdayChip";
 import { listPeople } from "@/db/queries/people";
 import { requireUser } from "@/lib/auth";
+import { daysUntilBirthday } from "@/lib/dates";
 import { formatBirthday, splitInterests } from "@/lib/format";
 
 export const metadata = { title: "People · Presently 🎀" };
 
 export default async function PeoplePage() {
   const user = await requireUser();
-  const people = await listPeople(user.id);
+  // Soonest birthday first; anyone without a birthday goes last.
+  const days = (birthday: string | null) => (birthday ? daysUntilBirthday(birthday) : Number.POSITIVE_INFINITY);
+  const people = (await listPeople(user.id)).toSorted((a, b) => days(a.birthday) - days(b.birthday));
 
   return (
     <div className="pt-6">
@@ -32,6 +36,7 @@ export default async function PeoplePage() {
                   {person.relationship}
                   {person.birthday && ` · 🎂 ${formatBirthday(person.birthday)}`}
                 </p>
+                <div className="mt-3"><BirthdayChip birthday={person.birthday} /></div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {splitInterests(person.interests).slice(0, 3).map((tag) => (
                     <span key={tag} className="rounded-full bg-lilac/40 px-3 py-0.5 text-sm font-medium">{tag}</span>
