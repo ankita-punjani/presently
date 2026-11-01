@@ -29,6 +29,13 @@
       "when": 1793571045870,
       "tag": "0003_stars",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793572285954,
+      "tag": "0004_budgets",
+      "breakpoints": true
     }
   ]
 }

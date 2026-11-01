@@ -72,3 +72,18 @@ export function validateIdea(values: Values) {
   }
   return errors;
 }
+
+export function validateBudget(values: Values) {
+  const errors: FormState["errors"] = {};
+  if (!values.name) errors.name = "Give this budget a name, like Holidays 2026 🎄";
+  checkLength(errors, "name", values.name, 100, "That name");
+  if (!values.amount) errors.amount = "How much do you want to spend?";
+  else if (Number(values.amount) === 0) errors.amount = "A budget needs to be more than $0.";
+  else checkMoney(errors, "amount", values.amount, "Budget");
+  if (!values.startDate) errors.startDate = "When does this budget start?";
+  if (!values.endDate) errors.endDate = "When does it end?";
+  else if (values.startDate && values.endDate < values.startDate) {
+    errors.endDate = "The end date has to be after the start date.";
+  }
+  return errors;
+}

@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/people", label: "People" },
   { href: "/ideas", label: "Ideas" },
   { href: "/starred", label: "Starred" },
+  { href: "/budgets", label: "Budgets" },
 ];
 
 export async function NavBar() {

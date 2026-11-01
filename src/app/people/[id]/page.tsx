@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BirthdayChip } from "@/components/BirthdayChip";
+import { BudgetBar } from "@/components/BudgetBar";
 import { DeleteButton } from "@/components/DeleteButton";
 import { IdeaCard } from "@/components/IdeaCard";
 import { listIdeasForPerson } from "@/db/queries/gift-ideas";
@@ -20,6 +21,9 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
 
   const interests = splitInterests(person.interests);
   const ideas = await listIdeasForPerson(user.id, person.id);
+  const spent = ideas
+    .filter((row) => row.idea.status !== "idea")
+    .reduce((sum, row) => sum + Math.round(Number(row.idea.price ?? 0) * 100), 0) / 100;
 
   return (
     <div className="pt-6">
@@ -58,6 +62,9 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
             <dd className="font-display text-2xl font-bold">
               {person.budget ? formatMoney(person.budget) : "No budget set"}
             </dd>
+            {person.budget && Number(person.budget) > 0 && (
+              <dd className="mt-2"><BudgetBar spent={spent} amount={Number(person.budget)} /></dd>
+            )}
           </div>
         </dl>
 
