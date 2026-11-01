@@ -28,6 +28,11 @@ export function listCategories() {
   return db.select().from(categories).orderBy(asc(categories.id));
 }
 
+export async function categoryExists(id: number) {
+  const [row] = await db.select({ id: categories.id }).from(categories).where(eq(categories.id, id));
+  return Boolean(row);
+}
+
 export function listIdeas(userId: string) {
   return selectIdeas().where(eq(giftIdeas.userId, userId)).orderBy(desc(giftIdeas.createdAt));
 }

@@ -2,52 +2,70 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createIdea, deleteIdea, getIdea, updateIdea, type IdeaInput } from "@/db/queries/gift-ideas";
+import {
+  categoryExists,
+  createIdea,
+  deleteIdea,
+  getIdea,
+  updateIdea,
+  type IdeaInput,
+} from "@/db/queries/gift-ideas";
 import { requireUser } from "@/lib/auth";
 import { OCCASIONS, STATUSES } from "@/lib/idea-options";
+import { cleanLink, readValues, validateIdea, type FormState } from "@/lib/validation";
 
-// Links become clickable hrefs, so only allow web addresses. This blocks things
-// like "javascript:..." and lets people paste "target.com/thing" without https.
-function cleanLink(value: string) {
-  if (!value) return null;
-  try {
-    const url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value}`);
-    return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
-  } catch {
-    return null;
-  }
-}
+const FIELDS = ["title", "personId", "categoryId", "price", "occasion", "status", "store", "link", "notes"];
 
-function readIdea(form: FormData, previousBoughtOn: string | null): IdeaInput {
-  const text = (key: string) => String(form.get(key) ?? "").trim();
-  const status = STATUSES.includes(text("status")) ? text("status") : "idea";
+const NOT_YOUR_PERSON = "Who’s this gift for? Pick someone from your list.";
+
+function toInput(values: FormState["values"], previousBoughtOn: string | null): IdeaInput {
+  const status = STATUSES.includes(values.status) ? values.status : "idea";
   return {
-    personId: Number(text("personId")),
-    categoryId: Number(text("categoryId")),
-    title: text("title"),
-    price: text("price") || null,
-    link: cleanLink(text("link")),
-    store: text("store") || null,
+    personId: Number(values.personId),
+    categoryId: Number(values.categoryId),
+    title: values.title,
+    price: values.price || null,
+    link: cleanLink(values.link),
+    store: values.store || null,
     status,
-    occasion: OCCASIONS.includes(text("occasion")) ? text("occasion") : "birthday",
+    occasion: OCCASIONS.includes(values.occasion) ? values.occasion : "birthday",
     // Spending stats count from this date: set once on purchase, cleared if undone.
     boughtOn: status === "idea" ? null : (previousBoughtOn ?? new Date().toISOString().slice(0, 10)),
-    notes: text("notes") || null,
+    notes: values.notes || null,
   };
 }
 
-export async function createIdeaAction(form: FormData) {
-  const user = await requireUser();
-  const idea = await createIdea(user.id, readIdea(form, null));
-  revalidatePath("/ideas");
-  redirect(idea ? `/ideas/${idea.id}` : "/ideas");
+async function validate(values: FormState["values"]) {
+  const errors = validateIdea(values);
+  if (!errors.categoryId && !(await categoryExists(Number(values.categoryId)))) {
+    errors.categoryId = "Pick a category so you can find it later.";
+  }
+  return errors;
 }
 
-export async function updateIdeaAction(id: number, form: FormData) {
+export async function createIdeaAction(_prev: FormState, form: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const values = readValues(form, FIELDS);
+  const errors = await validate(values);
+  if (Object.keys(errors).length) return { errors, values };
+
+  const idea = await createIdea(user.id, toInput(values, null));
+  if (!idea) return { errors: { personId: NOT_YOUR_PERSON }, values };
+  revalidatePath("/ideas");
+  redirect(`/ideas/${idea.id}`);
+}
+
+export async function updateIdeaAction(id: number, _prev: FormState, form: FormData): Promise<FormState> {
   const user = await requireUser();
   const existing = await getIdea(user.id, id);
   if (!existing) redirect("/ideas");
-  await updateIdea(user.id, id, readIdea(form, existing.idea.boughtOn));
+
+  const values = readValues(form, FIELDS);
+  const errors = await validate(values);
+  if (Object.keys(errors).length) return { errors, values };
+
+  const idea = await updateIdea(user.id, id, toInput(values, existing.idea.boughtOn));
+  if (!idea) return { errors: { personId: NOT_YOUR_PERSON }, values };
   revalidatePath("/ideas");
   redirect(`/ideas/${id}`);
 }
