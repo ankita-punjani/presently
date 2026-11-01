@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { BirthdayBanner } from "@/components/BirthdayBanner";
+import { birthdayLabel } from "@/components/BirthdayChip";
 import { SpendChart } from "@/components/SpendChart";
 import { StatCard } from "@/components/StatCard";
 import { getDashboardStats } from "@/db/queries/dashboard";
-import { listPeople } from "@/db/queries/people";
+import { listPeople, listUpcomingBirthdays } from "@/db/queries/people";
 import { requireUser } from "@/lib/auth";
 import { todayString } from "@/lib/dates";
-import { formatMoney } from "@/lib/format";
+import { formatBirthday, formatMoney } from "@/lib/format";
 
 export const metadata = { title: "Dashboard · Presently 🎀" };
 
@@ -14,8 +16,9 @@ export default async function DashboardPage() {
   const firstName = user.name.split(" ")[0];
   const year = todayString().slice(0, 4);
 
-  const [people, stats] = await Promise.all([
+  const [people, birthdays, stats] = await Promise.all([
     listPeople(user.id),
+    listUpcomingBirthdays(user.id),
     getDashboardStats(user.id, { start: `${year}-01-01`, end: `${year}-12-31` }),
   ]);
 
@@ -35,6 +38,8 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <>
+          <BirthdayBanner birthdays={birthdays} />
+
           <section aria-label="Your stats" className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard label="Total spent" value={formatMoney(stats.totalSpent)} tint="bg-pink/25" tilt="-rotate-1" />
             <StatCard label="Average gift" value={formatMoney(stats.averageGift)} tint="bg-lime/50" tilt="rotate-1" />
@@ -53,6 +58,24 @@ export default async function DashboardPage() {
               <SpendChart data={stats.byCategory} />
             )}
           </section>
+
+          {birthdays.length > 0 && (
+            <section className="sticker mt-8 p-5 sm:p-6">
+              <h2 className="font-display text-2xl font-bold">Coming up</h2>
+              <ul className="mt-3 divide-y-2 divide-ink/10">
+                {birthdays.slice(0, 5).map((birthday) => (
+                  <li key={birthday.id}>
+                    <Link href={`/people/${birthday.id}`} className="flex items-center justify-between gap-3 py-3 font-semibold hover:text-pink">
+                      <span>{birthday.name}</span>
+                      <span className="whitespace-nowrap text-sm text-ink/70">
+                        {formatBirthday(birthday.birthday)} · {birthdayLabel(birthday.days)}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </>
       )}
     </div>

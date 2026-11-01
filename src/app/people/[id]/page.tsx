@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BirthdayChip } from "@/components/BirthdayChip";
 import { DeleteButton } from "@/components/DeleteButton";
 import { IdeaCard } from "@/components/IdeaCard";
 import { listIdeasForPerson } from "@/db/queries/gift-ideas";
@@ -50,6 +51,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
             <dd className="font-display text-2xl font-bold">
               {person.birthday ? `🎂 ${formatBirthday(person.birthday)}` : "Not added yet"}
             </dd>
+            <dd className="mt-1"><BirthdayChip birthday={person.birthday} /></dd>
           </div>
           <div className="rounded-xl bg-lime/40 p-4">
             <dt className="text-sm font-semibold">Budget</dt>
