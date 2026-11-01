@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { BirthdayBanner } from "@/components/BirthdayBanner";
+import { BudgetBar } from "@/components/BudgetBar";
 import { birthdayLabel } from "@/components/BirthdayChip";
 import { SpendChart } from "@/components/SpendChart";
 import { StatCard } from "@/components/StatCard";
-import { getDashboardStats } from "@/db/queries/dashboard";
+import { getDashboard } from "@/db/queries/dashboard";
 import { listPeople, listUpcomingBirthdays } from "@/db/queries/people";
 import { requireUser } from "@/lib/auth";
-import { todayString } from "@/lib/dates";
 import { formatBirthday, formatMoney } from "@/lib/format";
 
 export const metadata = { title: "Dashboard · Presently 🎀" };
@@ -14,12 +14,11 @@ export const metadata = { title: "Dashboard · Presently 🎀" };
 export default async function DashboardPage() {
   const user = await requireUser();
   const firstName = user.name.split(" ")[0];
-  const year = todayString().slice(0, 4);
 
-  const [people, birthdays, stats] = await Promise.all([
+  const [people, birthdays, { budget, seasonLabel, stats }] = await Promise.all([
     listPeople(user.id),
     listUpcomingBirthdays(user.id),
-    getDashboardStats(user.id, { start: `${year}-01-01`, end: `${year}-12-31` }),
+    getDashboard(user.id),
   ]);
 
   return (
@@ -27,7 +26,7 @@ export default async function DashboardPage() {
       <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
         Hey {firstName} <span aria-hidden>✨</span>
       </h1>
-      <p className="mt-2 text-ink/70">Here’s your gifting so far in {year}.</p>
+      <p className="mt-2 text-ink/70">Here’s your gifting so far in {seasonLabel}.</p>
 
       {people.length === 0 ? (
         <div className="sticker mt-8 -rotate-1 bg-lime/40 p-8 text-center">
@@ -48,8 +47,22 @@ export default async function DashboardPage() {
           </section>
 
           <section className="sticker mt-8 p-5 sm:p-6">
+            {budget ? (
+              <>
+                <h2 className="mb-3 font-display text-2xl font-bold">{budget.name} budget</h2>
+                <BudgetBar spent={stats.totalSpent} amount={Number(budget.amount)} />
+              </>
+            ) : (
+              <p className="font-semibold">
+                Shopping for a season?{" "}
+                <Link href="/budgets/new" className="underline decoration-pink decoration-2 underline-offset-4">Set a budget</Link>
+              </p>
+            )}
+          </section>
+
+          <section className="sticker mt-8 p-5 sm:p-6">
             <h2 className="font-display text-2xl font-bold">Where your money went</h2>
-            <p className="mb-4 text-sm text-ink/70">Spending by category in {year}</p>
+            <p className="mb-4 text-sm text-ink/70">Spending by category in {seasonLabel}</p>
             {stats.byCategory.length === 0 ? (
               <p className="py-6 text-center text-ink/70">
                 Nothing bought yet. Mark a gift as bought and it’ll show up here 🛍️

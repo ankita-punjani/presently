@@ -120,3 +120,16 @@ export const stars = pgTable(
   },
   (table) => [primaryKey({ columns: [table.userId, table.giftIdeaId] })],
 );
+
+// A spending limit for a stretch of time. One user has many budgets.
+export const budgets = pgTable("budgets", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
