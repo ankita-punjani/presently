@@ -36,7 +36,7 @@ export function StatusButtons({ ideaId, status }: { ideaId: number; status: stri
           aria-pressed={shown === option.status}
           onClick={() => choose(option.status)}
           className={`rounded-full border-2 border-ink px-3 py-1 text-sm font-bold transition hover:-translate-y-0.5 ${
-            shown === option.status ? option.on : "bg-white"
+            shown === option.status ? option.on : "bg-surface"
           }`}
         >
           {option.label}

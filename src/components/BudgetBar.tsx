@@ -13,7 +13,7 @@ export function BudgetBar({ spent, amount }: { spent: number; amount: number }) 
         aria-valuemax={100}
         aria-valuenow={Math.min(percent, 100)}
         aria-label={`${formatMoney(spent)} of ${formatMoney(amount)} spent`}
-        className="h-5 overflow-hidden rounded-full border-2 border-ink bg-white"
+        className="h-5 overflow-hidden rounded-full border-2 border-ink bg-surface"
       >
         <div className={`h-full ${color}`} style={{ width: `${Math.min(percent, 100)}%` }} />
       </div>

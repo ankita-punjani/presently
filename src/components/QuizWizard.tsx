@@ -179,7 +179,7 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
         aria-valuemin={1}
         aria-valuemax={STEPS}
         aria-valuenow={step + 1}
-        className="mt-2 h-4 overflow-hidden rounded-full border-2 border-ink bg-white"
+        className="mt-2 h-4 overflow-hidden rounded-full border-2 border-ink bg-surface"
       >
         <div className="h-full bg-pink transition-all" style={{ width: `${((step + 1) / STEPS) * 100}%` }} />
       </div>

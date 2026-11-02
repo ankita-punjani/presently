@@ -11,7 +11,7 @@ export function BirthdayChip({ birthday }: { birthday: string | null }) {
   const days = daysUntilBirthday(birthday);
   return (
     <span className={`inline-block whitespace-nowrap rounded-full border-2 border-ink px-3 py-0.5 text-sm font-bold ${
-      days <= 14 ? "bg-tangerine" : "bg-white"
+      days <= 14 ? "bg-tangerine" : "bg-surface"
     }`}>
       {birthdayLabel(days)}
     </span>

@@ -18,7 +18,7 @@ export function GiftImage({ src, alt, emoji }: Props) {
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
-          className="h-full w-full bg-white object-contain p-2"
+          className="h-full w-full bg-surface object-contain p-2"
         />
       ) : (
         <span className="text-7xl" aria-hidden>{emoji}</span>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { LogOutButton } from "./LogOutButton";
+import { ThemeToggle } from "./ThemeToggle";
 
 const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -31,10 +32,14 @@ export async function NavBar() {
               </Link>
             ))}
           </nav>
-          <LogOutButton />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LogOutButton />
+          </div>
         </>
       ) : (
         <nav className="flex items-center gap-3 text-sm font-semibold">
+          <ThemeToggle />
           <Link href="/login" className="hover:text-pink">
             Log in
           </Link>
