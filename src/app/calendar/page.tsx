@@ -53,7 +53,7 @@ export default async function CalendarPage({ searchParams }: Props) {
                     {day}
                   </span>
                   {birthdays.get(day)?.map((person) => (
-                    <Link key={person.id} href={`/people/${person.id}`} className="mt-1 hidden truncate rounded bg-white px-1 text-xs font-semibold hover:text-pink sm:block">
+                    <Link key={person.id} href={`/people/${person.id}`} className="mt-1 hidden truncate rounded bg-surface px-1 text-xs font-semibold hover:text-pink sm:block">
                       🎂 {person.name}
                     </Link>
                   ))}

@@ -1,12 +1,26 @@
 @import "tailwindcss";
 
+:root {
+  --cream: #fff8ee;
+  --surface: #ffffff;
+  --ink: #1a1a1a;
+}
+
+.dark {
+  --cream: #16121f;
+  --surface: #241d33;
+  --ink: #fff4e6;
+  color-scheme: dark;
+}
+
 @theme inline {
-  --color-cream: #fff8ee;
+  --color-cream: var(--cream);
+  --color-surface: var(--surface);
   --color-pink: #ff4f9a;
   --color-tangerine: #ff8a3d;
   --color-lime: #c6f432;
   --color-lilac: #b9a6ff;
-  --color-ink: #1a1a1a;
+  --color-ink: var(--ink);
   --font-display: var(--font-bricolage);
   --font-sans: var(--font-dm-sans);
 }
@@ -16,9 +30,16 @@ body {
   color: var(--color-ink);
 }
 
+/* Bright fills keep dark text in dark mode, or it would be cream on lime. */
+.dark .bg-lime,
+.dark .bg-tangerine,
+.dark .bg-lilac {
+  color: #1a1a1a;
+}
+
 /* Chunky "sticker" card: thick outline + hard offset shadow. */
 @utility sticker {
-  @apply rounded-2xl border-2 border-ink bg-white shadow-[4px_4px_0_0_var(--color-ink)];
+  @apply rounded-2xl border-2 border-ink bg-surface shadow-[4px_4px_0_0_var(--color-ink)];
 }
 
 @utility btn {
@@ -32,11 +53,11 @@ body {
   @apply btn bg-pink text-white;
 }
 @utility btn-plain {
-  @apply btn bg-white text-ink;
+  @apply btn bg-surface text-ink;
 }
 
 @utility field {
-  @apply w-full rounded-xl border-2 border-ink bg-white px-4 py-2.5 outline-none
+  @apply w-full rounded-xl border-2 border-ink bg-surface px-4 py-2.5 outline-none
     placeholder:text-ink/40 focus:shadow-[3px_3px_0_0_var(--color-pink)];
 }
 @utility field-error {

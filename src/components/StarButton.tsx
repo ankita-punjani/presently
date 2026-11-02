@@ -23,7 +23,7 @@ export function StarButton({ ideaId, title, starred }: Props) {
       aria-pressed={shown}
       aria-label={shown ? `Unstar ${title}` : `Star ${title}`}
       className={`flex size-10 items-center justify-center rounded-full border-2 border-ink text-lg transition hover:scale-110 active:scale-95 ${
-        shown ? "bg-pink" : "bg-white grayscale"
+        shown ? "bg-pink" : "bg-surface grayscale"
       }`}
     >
       <span aria-hidden>⭐</span>

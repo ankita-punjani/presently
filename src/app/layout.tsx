@@ -8,6 +8,9 @@ const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
 });
 
+// Runs before the page paints, so a dark mode user never sees a white flash.
+const THEME_SCRIPT = `try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch{}`;
+
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
@@ -24,7 +27,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className={`${bricolage.variable} ${dmSans.variable} font-sans antialiased`}>
         <NavBar />
         <main className="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-6">{children}</main>

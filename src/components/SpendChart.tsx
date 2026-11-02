@@ -10,7 +10,7 @@ function SpendTooltip({ active, payload }: TooltipProps) {
   const entry = payload?.[0]?.payload;
   if (!active || !entry) return null;
   return (
-    <div className="rounded-xl border-2 border-ink bg-white px-3 py-2 text-sm font-semibold">
+    <div className="rounded-xl border-2 border-ink bg-surface px-3 py-2 text-sm font-semibold">
       {entry.emoji} {entry.category}: {formatMoney(entry.spent)}
     </div>
   );
