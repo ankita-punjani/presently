@@ -37,6 +37,12 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/quiz" className="btn-pink">Find a gift 🔮</Link>
+            <Link href="/ideas/new" className="btn-plain">Save an idea 💡</Link>
+            <Link href="/people/new" className="btn-plain">Add someone ➕</Link>
+          </div>
+
           <BirthdayBanner birthdays={birthdays} />
 
           <section aria-label="Your stats" className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">

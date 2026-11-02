@@ -7,6 +7,8 @@ import { formatBirthday, splitInterests } from "@/lib/format";
 
 export const metadata = { title: "People · Presently 🎀" };
 
+const AVATAR_TINTS = ["bg-pink", "bg-tangerine", "bg-lime", "bg-lilac"];
+
 export default async function PeoplePage() {
   const user = await requireUser();
   // Soonest birthday first; anyone without a birthday goes last.
@@ -31,7 +33,12 @@ export default async function PeoplePage() {
           {people.map((person) => (
             <li key={person.id}>
               <Link href={`/people/${person.id}`} className="sticker block h-full p-5 transition hover:-rotate-1">
-                <h2 className="font-display text-2xl font-bold leading-tight">{person.name}</h2>
+                <div className="flex items-center gap-3">
+                  <span aria-hidden className={`flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink font-display text-xl font-bold text-[#1a1a1a] ${AVATAR_TINTS[person.id % AVATAR_TINTS.length]}`}>
+                    {person.name[0]?.toUpperCase()}
+                  </span>
+                  <h2 className="font-display text-2xl font-bold leading-tight">{person.name}</h2>
+                </div>
                 <p className="mt-1 text-sm capitalize text-ink/70">
                   {person.relationship}
                   {person.birthday && ` · 🎂 ${formatBirthday(person.birthday)}`}
