@@ -121,6 +121,13 @@ export async function updateIdea(userId: string, id: number, input: IdeaInput) {
   return idea ?? null;
 }
 
+export async function setIdeaStatus(userId: string, id: number, status: string, boughtOn: string | null) {
+  await db
+    .update(giftIdeas)
+    .set({ status, boughtOn })
+    .where(and(eq(giftIdeas.id, id), eq(giftIdeas.userId, userId)));
+}
+
 export async function deleteIdea(userId: string, id: number) {
   await db.delete(giftIdeas).where(and(eq(giftIdeas.id, id), eq(giftIdeas.userId, userId)));
 }

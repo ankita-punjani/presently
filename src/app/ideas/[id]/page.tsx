@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/DeleteButton";
 import { GiftImage } from "@/components/GiftImage";
 import { StarButton } from "@/components/StarButton";
-import { StatusPill } from "@/components/StatusPill";
+import { StatusButtons } from "@/components/StatusButtons";
 import { getIdea } from "@/db/queries/gift-ideas";
 import { requireUser } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
@@ -36,7 +36,7 @@ export default async function IdeaPage({ params }: { params: Promise<{ id: strin
             <p className="text-5xl" aria-hidden>{giftEmoji(idea.title, categoryEmoji)}</p>
             <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">{idea.title}</h1>
             <p className="mt-1 text-ink/70">For {personName} · {categoryName}</p>
-            <div className="mt-3"><StatusPill status={idea.status} /></div>
+            <div className="mt-4"><StatusButtons ideaId={idea.id} status={idea.status} /></div>
           </div>
           <div className="flex items-center gap-3">
             <StarButton ideaId={idea.id} title={idea.title} starred={row.starred} />
