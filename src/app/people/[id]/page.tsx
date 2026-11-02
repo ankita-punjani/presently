@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BirthdayChip } from "@/components/BirthdayChip";
 import { BudgetBar } from "@/components/BudgetBar";
 import { DeleteButton } from "@/components/DeleteButton";
+import { GiftRoulette } from "@/components/GiftRoulette";
 import { IdeaCard } from "@/components/IdeaCard";
 import { listIdeasForPerson } from "@/db/queries/gift-ideas";
 import { getPerson } from "@/db/queries/people";
@@ -21,6 +22,9 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
 
   const interests = splitInterests(person.interests);
   const ideas = await listIdeasForPerson(user.id, person.id);
+  const unbought = ideas
+    .filter((row) => row.idea.status === "idea")
+    .map((row) => ({ id: row.idea.id, title: row.idea.title }));
   const spent = ideas
     .filter((row) => row.idea.status !== "idea")
     .reduce((sum, row) => sum + Math.round(Number(row.idea.price ?? 0) * 100), 0) / 100;
@@ -95,6 +99,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
             <Link href={`/ideas/new?person=${person.id}`} className="btn-plain">Add an idea 💡</Link>
           </div>
         </div>
+        {unbought.length > 1 && <GiftRoulette ideas={unbought} />}
         {ideas.length === 0 ? (
           <p className="mt-4 text-ink/70">Nothing saved for {person.name} yet. What have they been hinting at?</p>
         ) : (
