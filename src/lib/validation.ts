@@ -87,3 +87,15 @@ export function validateBudget(values: Values) {
   }
   return errors;
 }
+
+export function validateWish(values: Values) {
+  const errors: FormState["errors"] = {};
+  if (!values.title) errors.title = "What do you wish for? ✨";
+  checkLength(errors, "title", values.title, 200, "That wish");
+  checkLength(errors, "notes", values.notes, 500, "That note");
+  checkMoney(errors, "price", values.price, "Price");
+  if (values.link && !cleanLink(values.link)) {
+    errors.link = "That link doesn’t look right. Try something like target.com/thing.";
+  }
+  return errors;
+}

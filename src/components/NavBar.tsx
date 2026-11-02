@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/ideas", label: "Ideas" },
   { href: "/starred", label: "Starred" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/wishlist", label: "My wishlist" },
   { href: "/budgets", label: "Budgets" },
   { href: "/quiz", label: "Gift quiz 🔮" },
 ];
