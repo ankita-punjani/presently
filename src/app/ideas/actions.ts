@@ -7,6 +7,7 @@ import {
   createIdea,
   deleteIdea,
   getIdea,
+  setIdeaStatus,
   setStar,
   updateIdea,
   type IdeaInput,
@@ -82,5 +83,15 @@ export async function deleteIdeaAction(id: number) {
 export async function setStarAction(id: number, starred: boolean) {
   const user = await requireUser();
   await setStar(user.id, id, starred);
+  revalidatePath("/", "layout");
+}
+
+export async function setStatusAction(id: number, status: string) {
+  const user = await requireUser();
+  const existing = await getIdea(user.id, id);
+  if (!existing || !STATUSES.includes(status)) return;
+
+  const boughtOn = status === "idea" ? null : (existing.idea.boughtOn ?? todayString());
+  await setIdeaStatus(user.id, id, status, boughtOn);
   revalidatePath("/", "layout");
 }
