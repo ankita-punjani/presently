@@ -6,11 +6,19 @@
 
 ## What it does
 Create a free account and build your own gift tracker:
-- Add the people you shop for, with their birthday, budget and interests
-- Save gift ideas for each person, sorted into categories, and track them from idea → bought → given
-- Everything is private: you only ever see your own data
 
-More features are on the way. See the numbered list in [PLAN.md](PLAN.md).
+- **People:** birthdays, budgets, interests and notes for everyone you shop for
+- **Gift ideas:** save them by person and category, and track them from idea → bought → given, with confetti at the end 🎉
+- **Gift-finder quiz:** 5 quick questions, 8 ideas that fit, with links to trusted stores
+- **Search, filter and sort** your ideas, and star your favorites
+- **Dashboard:** spending stats, a chart by category, and birthday reminders
+- **Budgets:** track a season's spending and a budget per person
+- **Calendar:** every birthday on a month view
+- **Wishlist:** list what you want and share a private link
+- **Gift roulette:** let fate pick when you can't decide
+- **Dark mode** and a phone-friendly layout
+
+Everything is private: you only ever see your own data.
 
 ## Tools
 | Tool | What it's for |
@@ -19,7 +27,12 @@ More features are on the way. See the numbered list in [PLAN.md](PLAN.md).
 | Tailwind CSS | Styling |
 | Neon Postgres | Database |
 | Drizzle ORM | Tables and queries in TypeScript |
-| Better Auth | Sign up, log in, log out |
+| Better Auth | Sign up, log in, log out, and optional Google sign-in |
+| Recharts | Dashboard chart |
+| canvas-confetti | Confetti |
+| Google Gemini (optional) | AI gift ideas |
+| Serper (optional) | Real product photos |
+| Vitest | Tests |
 | Vercel | Hosting, with a new deploy on every merge to `main` |
 | Claude Code | AI coding agent |
 
@@ -50,5 +63,16 @@ You'll need Node.js and a free [Neon](https://neon.tech) database.
    npm run dev
    ```
 
+**Optional keys:** without them the app still works fully. The quiz uses a hand-picked list of 143 gifts, and the Google button stays hidden. See `.env.example` for `GEMINI_API_KEY`, `SERPER_API_KEY` and the Google keys.
+
+## Tests
+Tests start the real app and use a separate database, so they never touch real data. Put a test `DATABASE_URL`, `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL="http://localhost:3100"` in `.env.test`, stop any running dev server, then:
+
+```bash
+npm test
+```
+
+They cover data isolation between users, the dashboard stats, and the gift finder. Red and green screenshots are in [docs/tests](docs/tests).
+
 ## How it was built
-Every change went through an Issue, a branch and a pull request. Nothing is committed directly to `main`. The plan is in [PLAN.md](PLAN.md) and the key AI prompts are in [prompts/](prompts/).
+Every change went through an Issue, a branch and a pull request. Nothing is committed directly to `main`. The plan is in [PLAN.md](PLAN.md), including Plan vs. Reality, and the key AI prompts are in [prompts/](prompts/).

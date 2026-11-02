@@ -229,3 +229,33 @@ Written with **Vitest**, run against a separate **Neon test branch** of the data
 4. Per-person budgets (keep the season budget only)
 
 The spine (#1–#8) and my 3 features (#9, #10, #11) are never cut.
+
+---
+
+## Plan vs. Reality
+
+*Added at the end. Everything above this line is the original plan, unchanged.*
+
+| Planned feature | Shipped / Changed / Cut | Status | Learning | What changed and why |
+|---|---|---|---|---|
+| #1 Sign up, log in, log out | Shipped | Done | Better Auth needs extra tables beyond `users`. | Added `sessions`, `accounts` and `verifications`. |
+| #2 People CRUD | Changed | Done | A date picker can't leave the year blank. | The plan said the year was optional, but the picker needs a full date. Only month and day are shown. |
+| #3 Gift ideas + categories | Shipped | Done | Forms can be tampered with, so the server must re-check ownership. | Added an ownership check and blocked `javascript:` links. |
+| #4 Validation | Shipped | Done | A dropdown doesn't keep its value after a failed save the way a text box does. | Server-side rules, and a bad link now shows a message rather than vanishing. |
+| #5 Stars | Shipped | Done | A button inside a link is invalid HTML. | The star sits beside the card's link. |
+| #6 Find things | Changed | Done | `%` is a wildcard in database searches. | Search also covers store and notes, not just title. |
+| #7 Dashboard | Changed | Done | Add money in whole cents to avoid rounding errors. | "This season" means the active budget, or the calendar year if there isn't one. |
+| #8 Data isolation test | Changed | Done | A test that can't fail proves nothing, so red-then-green matters. | Went beyond the plan: real sign-ups, real pages, plus edit, delete and star attempts. |
+| Dashboard test (Section 4) | Changed | Done | Check what a test depends on before ordering the work. | Moved after #10, because it needs a budget. |
+| #9 Birthday countdown | Changed | Done | Emails need an extra service, while a banner is free. | "Reminders" are in-app only. Added a Coming up list. |
+| #10 Budget tracker | Changed | Done | A person's budget has no dates, so it can't be "this season". | Person budgets count everything ever bought for them. |
+| #11 Gift-finder quiz | Changed | Done, but real AI untested | "Generic but working" isn't good enough. Trying it for a real friend showed that. | 8 results, not 5. The AI model changed because the free list had moved on. Added `quiz_runs`, and a backup list of 143 hand-picked gifts carries the quiz until a key is added. |
+| #12 Real product photos + trusted links | Changed | Backlogged until a key is added | Don't ship what you can't verify. | Code and tests are done, but real photos need a free Serper key. Gift-specific art shows until then. |
+| #13 Continue with Google | Shipped | Backlogged until keys are added | Hide features that aren't configured. | The button stays hidden until Google keys are set. |
+| #14 Shareable wishlist | Changed | Done | A public page needs its own privacy check. | The plan had nowhere to store my own wishes, so `wishes` and `wishlist_shares` were added. |
+| #15 Birthday calendar | Shipped | Done | Feb 29 needs a rule. | Shows on Mar 1 in non-leap years, matching the countdown. |
+| #16 Gift roulette | Shipped | Done | Small features add personality. | Shows when a person has 2 or more unbought ideas. |
+| #17 Dark mode | Shipped | Done | Cream text on lime is unreadable. | Bright chips keep dark text. |
+| Design (Section 6) | Shipped | Done | Design is worth its own PR. | Added a landing page, a ticker and a 404 page. Nothing was cut. |
+| Cut list (Section 7) | Not needed | Done | Cutting wasn't necessary because each feature stayed small. | Nothing from the cut list was removed. |
+| Hard $0 rule | Shipped | Done | Check free tiers before committing to a tool. | Claude's API was swapped for Gemini's free tier during planning. |
