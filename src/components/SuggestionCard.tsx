@@ -5,6 +5,8 @@ import { useState, useTransition } from "react";
 import type { SaveResult } from "@/app/quiz/actions";
 import type { Suggestion } from "@/lib/gift-finder";
 import { formatMoney } from "@/lib/format";
+import { giftEmoji } from "@/lib/gift-emoji";
+import { GiftImage } from "./GiftImage";
 
 type Props = {
   suggestion: Suggestion;
@@ -22,18 +24,11 @@ export function SuggestionCard({ suggestion, emoji, onSave }: Props) {
 
   return (
     <article className="sticker flex h-full flex-col overflow-hidden transition hover:-rotate-1">
-      <div className="flex h-44 items-center justify-center border-b-2 border-ink bg-lilac/30">
-        {suggestion.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- product photos come from many store hosts
-          <img src={suggestion.imageUrl} alt={suggestion.title} loading="lazy" className="h-full w-full bg-white object-contain p-2" />
-        ) : (
-          <span className="text-7xl" aria-hidden>{emoji}</span>
-        )}
-      </div>
+      <GiftImage src={suggestion.imageUrl} alt={suggestion.title} emoji={giftEmoji(suggestion.title, emoji)} />
       <div className="flex flex-1 flex-col p-5">
         <h2 className="font-display text-xl font-bold leading-tight">{suggestion.title}</h2>
         <p className="mt-1 text-sm font-semibold">
-          ~{formatMoney(suggestion.price)} · <span className="text-ink/70">{suggestion.store}</span>
+          ~{formatMoney(suggestion.price)} · <span className="text-ink/70">✓ {suggestion.store}</span>
         </p>
         <p className="mt-2 flex-1 text-sm text-ink/80">{suggestion.whyItFits}</p>
 

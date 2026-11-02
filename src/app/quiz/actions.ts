@@ -11,6 +11,7 @@ import { backupSuggestions, fetchAiIdeas, ideaToSuggestion, type QuizAnswers, ty
 import { BUDGETS, QUIZ_OCCASIONS, VIBES } from "@/lib/quiz-options";
 import { isTrustedUrl } from "@/lib/trusted-stores";
 import { GIFT_FOR } from "@/lib/people-options";
+import { addProductPhotos } from "@/lib/add-product-photos";
 
 const AI_RUNS_PER_DAY = 10;
 
@@ -45,12 +46,12 @@ export async function findGiftsAction(input: QuizAnswers): Promise<QuizResult> {
     try {
       await db.insert(quizRuns).values({ userId: user.id });
       const ideas = await fetchAiIdeas(answers, apiKey);
-      return { suggestions: ideas.map(ideaToSuggestion), source: "ai" };
+      return { suggestions: await addProductPhotos(ideas.map(ideaToSuggestion), answers.budgetId), source: "ai" };
     } catch (error) {
       console.error("Gift finder fell back to the backup list:", error);
     }
   }
-  return { suggestions: backupSuggestions(answers), source: "backup" };
+  return { suggestions: await addProductPhotos(backupSuggestions(answers), answers.budgetId), source: "backup" };
 }
 
 export type SaveResult = { ideaId?: number; personId?: number; error?: string };

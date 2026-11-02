@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/DeleteButton";
+import { GiftImage } from "@/components/GiftImage";
 import { StarButton } from "@/components/StarButton";
 import { StatusPill } from "@/components/StatusPill";
 import { getIdea } from "@/db/queries/gift-ideas";
 import { requireUser } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
+import { giftEmoji } from "@/lib/gift-emoji";
 import { parseId } from "@/lib/params";
 import { deleteIdeaAction } from "../actions";
 
@@ -24,9 +26,14 @@ export default async function IdeaPage({ params }: { params: Promise<{ id: strin
       <Link href={`/people/${idea.personId}`} className="text-sm font-semibold hover:text-pink">← {personName}</Link>
 
       <div className="sticker mt-4 p-6 sm:p-8">
+        {idea.imageUrl && (
+          <div className="-mx-6 -mt-6 mb-6 overflow-hidden rounded-t-[14px] sm:-mx-8 sm:-mt-8">
+            <GiftImage src={idea.imageUrl} alt={idea.title} emoji={giftEmoji(idea.title, categoryEmoji)} />
+          </div>
+        )}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-5xl" aria-hidden>{categoryEmoji}</p>
+            <p className="text-5xl" aria-hidden>{giftEmoji(idea.title, categoryEmoji)}</p>
             <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">{idea.title}</h1>
             <p className="mt-1 text-ink/70">For {personName} · {categoryName}</p>
             <div className="mt-3"><StatusPill status={idea.status} /></div>
