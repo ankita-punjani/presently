@@ -20,6 +20,7 @@ export type Suggestion = {
   store: string;
   link: string;
   imageUrl: string | null;
+  searchTerms: string;
 };
 
 export type RawIdea = { title: string; whyItFits: string; price: number; category: string; searchTerms: string };
@@ -119,6 +120,7 @@ export function ideaToSuggestion(idea: RawIdea): Suggestion {
     store: store.name,
     link: store.search(idea.searchTerms),
     imageUrl: null,
+    searchTerms: idea.searchTerms,
   };
 }
 
@@ -166,6 +168,7 @@ export function backupSuggestions(answers: QuizAnswers, random = Math.random): S
       store: store.name,
       link: store.search(gift.title),
       imageUrl: null,
+      searchTerms: gift.title,
     };
   });
 }

@@ -1,4 +1,4 @@
-import { boolean, date, integer, numeric, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, date, integer, jsonb, numeric, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
 
 // Login tables. Column names follow what Better Auth expects; table names are
 // plural (see `usePlural` in src/lib/auth.ts) so `users` matches PLAN.md.
@@ -141,4 +141,11 @@ export const quizRuns = pgTable("quiz_runs", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Saved shopping searches, to spend fewer free API credits. Holds no personal data.
+export const productCache = pgTable("product_cache", {
+  query: text("query").primaryKey(),
+  results: jsonb("results").notNull(),
+  fetchedAt: timestamp("fetched_at").notNull().defaultNow(),
 });
