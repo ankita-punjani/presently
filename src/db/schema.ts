@@ -149,3 +149,25 @@ export const productCache = pgTable("product_cache", {
   results: jsonb("results").notNull(),
   fetchedAt: timestamp("fetched_at").notNull().defaultNow(),
 });
+
+// Things a user wants for themselves.
+export const wishes = pgTable("wishes", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  link: text("link"),
+  price: numeric("price", { precision: 10, scale: 2 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// A row here means this user's wishlist is public at /w/<token>. Delete it to stop sharing.
+export const wishlistShares = pgTable("wishlist_shares", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
