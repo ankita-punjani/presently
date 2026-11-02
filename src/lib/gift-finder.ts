@@ -27,6 +27,7 @@ export type RawIdea = { title: string; whyItFits: string; price: number; categor
 
 const MODEL = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
 const TIMEOUT_MS = 8000;
+const RESULT_COUNT = 8;
 
 const budgetFor = (id: string) => BUDGETS.find((budget) => budget.id === id) ?? BUDGETS[1];
 
@@ -35,8 +36,8 @@ export function buildPrompt(answers: QuizAnswers) {
   const budget = budgetFor(answers.budgetId);
   return [
     "You are a thoughtful, creative gift advisor.",
-    "Suggest exactly 5 different, specific gifts someone could buy online in the USA.",
-    "Avoid generic ideas like gift cards. Each one should feel chosen for this person.",
+    "Suggest exactly 8 different, specific gifts someone could buy online in the USA.",
+    "Be specific and surprising: name real brands and products where you can, and lean hard into their interests. Avoid generic ideas. Each one should feel chosen for this person, and a little humor is welcome.",
     `Shopping for: ${answers.giftFor}`,
     `Their interests: ${answers.interests.join(", ") || "not given"}`,
     `Use only these categories: ${answers.categories.join(", ")}`,
@@ -83,7 +84,7 @@ export function parseIdeas(text: string, categories: string[]): RawIdea[] {
       whyItFits: idea.whyItFits.slice(0, 240),
       searchTerms: idea.searchTerms.slice(0, 80),
     }))
-    .slice(0, 5);
+    .slice(0, RESULT_COUNT);
 }
 
 export async function fetchAiIdeas(answers: QuizAnswers, apiKey: string) {
@@ -131,9 +132,37 @@ const VIBE_WORDS: Record<string, string> = {
   treat: "a little luxury",
 };
 
-function matchingTag(tags: string[], interests: string[]) {
-  const wanted = interests.map((interest) => interest.toLowerCase());
-  return tags.find((tag) => wanted.some((interest) => interest.includes(tag) || tag.includes(interest)));
+// People type interests in many ways, so "perfumes" and "gadgets" should both land.
+const SYNONYMS: Record<string, string[]> = {
+  luxury: ["luxury"], luxurious: ["luxury"], fancy: ["luxury"], designer: ["luxury", "fashion"], expensive: ["luxury"],
+  perfume: ["perfume"], fragrance: ["perfume"], cologne: ["perfume"], scent: ["perfume"],
+  massage: ["massage", "spa"], spa: ["spa", "massage", "self care"], relaxing: ["spa", "self care"],
+  electronic: ["tech"], gadget: ["tech"], tech: ["tech"], apple: ["tech"], phone: ["tech"],
+  blazer: ["blazer", "fashion"], suit: ["blazer", "fashion"], formal: ["blazer", "fashion"],
+  clothe: ["fashion"], clothing: ["fashion"], fashion: ["fashion"], style: ["fashion"], outfit: ["fashion"],
+  dress: ["dress", "fashion"], zara: ["zara", "dress", "fashion"], shopping: ["fashion"],
+  cooking: ["cooking"], cook: ["cooking"], baking: ["baking", "cooking"], chef: ["cooking"], food: ["cooking"], foodie: ["cooking"],
+  kitchen: ["cooking"], spice: ["spices", "cooking"], indian: ["spices", "cooking"],
+  skincare: ["skincare"], skin: ["skincare"], beauty: ["beauty", "skincare"], makeup: ["makeup", "beauty"], korean: ["skincare"],
+  business: ["travel", "luxury"], flight: ["travel"], flying: ["travel"], travel: ["travel"], traveling: ["travel"], trip: ["travel"], airport: ["travel"],
+  gym: ["fitness"], fitness: ["fitness"], workout: ["fitness"], running: ["running", "fitness"], yoga: ["fitness", "self care"],
+  tea: ["tea"], matcha: ["matcha", "tea"], coffee: ["coffee"], wine: ["wine"], gaming: ["gaming"], game: ["gaming", "games"],
+  music: ["music"], vinyl: ["vinyl", "music"], reading: ["books"], book: ["books"], art: ["art"], plant: ["plants"], houseplant: ["plants"],
+};
+
+function interestTags(interests: string[]) {
+  const tags = new Set<string>();
+  for (const interest of interests) {
+    tags.add(interest.toLowerCase());
+    for (const word of interest.toLowerCase().split(/\s+/)) {
+      const stem = word.replace(/(es|s)$/, "");
+      for (const key of [word, stem, word.replace(/s$/, "")]) {
+        tags.add(key);
+        for (const tag of SYNONYMS[key] ?? []) tags.add(tag);
+      }
+    }
+  }
+  return tags;
 }
 
 export function backupSuggestions(answers: QuizAnswers, random = Math.random): Suggestion[] {
@@ -145,24 +174,30 @@ export function backupSuggestions(answers: QuizAnswers, random = Math.random): S
   // Once everything's been shown, start over rather than coming up empty.
   const pool = unseen.length > 0 ? unseen : inCategories;
 
+  const wanted = interestTags(answers.interests);
+
   const scored = pool
     .map((gift) => {
-      const tag = matchingTag(gift.tags, answers.interests);
+      const matches = gift.tags.filter((tag) => wanted.has(tag));
       const fitsBudget = gift.price >= budget.min && gift.price <= budget.max;
       const fitsVibe = gift.vibes.includes(answers.vibe);
-      const score = (tag ? 4 : 0) + (fitsVibe ? 2 : 0) + (fitsBudget ? 5 : 0) + random();
-      return { gift, tag, score };
+      // Interests matter most. The random part keeps results from feeling repetitive.
+      const score = matches.length * 6 + (fitsBudget ? 5 : 0) + (fitsVibe ? 2 : 0) + random() * 3;
+      return { gift, tag: matches[0], score };
     })
     .sort((a, b) => b.score - a.score);
 
   // Gifts in the budget range come first, and cheaper ones fill the list. Never pricier.
-  return scored.slice(0, 5).map(({ gift, tag }) => {
+  return scored.slice(0, RESULT_COUNT).map(({ gift, tag }) => {
     const store = findStore(gift.store)!;
+    const vibeWords = VIBE_WORDS[answers.vibe] ?? "a great pick";
     return {
       title: gift.title,
-      whyItFits: tag
-        ? `Perfect for someone into ${tag}, and ${VIBE_WORDS[answers.vibe] ?? "a great pick"}.`
-        : `${(VIBE_WORDS[answers.vibe] ?? "A great pick").replace(/^./, (c) => c.toUpperCase())}, right in your budget.`,
+      whyItFits:
+        gift.why ??
+        (tag
+          ? `Perfect for someone into ${tag}, and ${vibeWords}.`
+          : `${vibeWords.replace(/^./, (c) => c.toUpperCase())}, right in your budget.`),
       price: gift.price,
       category: gift.category,
       store: store.name,

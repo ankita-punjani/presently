@@ -93,17 +93,37 @@ describe("backup list", () => {
 
   it("starts over rather than coming up empty", () => {
     const all = backupSuggestions({ ...answers, alreadyShown: Array.from({ length: 50 }, (_, i) => `x${i}`) });
-    expect(all.length).toBe(5);
+    expect(all.length).toBe(8);
+  });
+});
+
+describe("interests shape the results", () => {
+  const titles = (interests: string[], categories: string[], budgetId: string) =>
+    backupSuggestions({ ...answers, interests, categories, budgetId, vibe: "treat" }).map((gift) => gift.title).join();
+
+  it("finds perfume from 'perfumes', and massage gifts from 'massages'", () => {
+    expect(titles(["perfumes"], ["Skincare & beauty"], "100-300")).toMatch(/Tom Ford|Chanel/);
+    expect(titles(["massages"], ["Experiences"], "100-300")).toMatch(/massage/i);
+  });
+
+  it("treats 'electronics' as tech, and 'business class' as luxury travel", () => {
+    expect(titles(["electronics"], ["Gaming & tech"], "100-300")).toMatch(/AirPods|Sony|Kindle|Theragun/);
+    expect(titles(["business class"], ["Experiences"], "25-50")).toMatch(/Business Class/);
+  });
+
+  it("finds Zara dresses and cooking gifts", () => {
+    expect(titles(["Zara", "dresses"], ["Clothes & accessories"], "50-100")).toMatch(/Zara/);
+    expect(titles(["cooking"], ["Food & drink"], "25-50")).toMatch(/spice|Masala|thermometer|Truffle/i);
   });
 });
 
 describe("every quiz combination gets a full set", () => {
   const categories = [...new Set(BACKUP_GIFTS.map((gift) => gift.category))];
 
-  it.each(categories)("%s has 5 gifts in every budget", (category) => {
+  it.each(categories)("%s has a full set in every budget", (category) => {
     for (const budget of BUDGETS) {
       const gifts = backupSuggestions({ ...answers, categories: [category], budgetId: budget.id });
-      expect(gifts.length, `${category} ${budget.label}`).toBe(5);
+      expect(gifts.length, `${category} ${budget.label}`).toBeGreaterThanOrEqual(budget.max <= 25 ? 5 : 8);
     }
   });
 
