@@ -1,4 +1,10 @@
 const EMOJI: [RegExp, string][] = [
+  [/massage|spa\b/i, "💆"], [/parfum|perfume|fragrance|travel spray/i, "🌸"], [/lounge|business class|luggage|airport/i, "✈️"],
+  [/airpods|headphone|earbud|speaker/i, "🎧"], [/kindle|e-reader/i, "📚"], [/apple watch|dress watch/i, "⌚"], [/steam deck/i, "🎮"],
+  [/dress\b/i, "👗"], [/blazer/i, "🧥"], [/cufflink|pocket square/i, "🤵"], [/cashmere|pajama|bathrobe/i, "🧖"], [/sunglasses/i, "🕶️"],
+  [/knife/i, "🔪"], [/dutch oven/i, "🍲"], [/masala|spice|saffron/i, "🌶️"], [/truffle/i, "🍄"], [/thermometer/i, "🌡️"], [/champagne/i, "🍾"],
+  [/cookbook/i, "📕"], [/cooking class|private chef/i, "👩‍🍳"], [/dyson|airwrap/i, "💇"], [/led light|face mask/i, "✨"], [/pillowcase/i, "🛏️"],
+  [/nespresso/i, "☕"], [/gift card/i, "🎟️"],
   [/matcha|tea\b/i, "🍵"], [/coffee|espresso|pour-over|tumbler/i, "☕"], [/mug/i, "🫖"], [/candle/i, "🕯️"],
   [/plant|pothos|succulent|planter/i, "🌿"], [/blanket|throw/i, "🛋️"], [/slipper/i, "🥿"], [/lamp/i, "💡"],
   [/book|novel|guide|journal/i, "📖"], [/puzzle/i, "🧩"], [/board game|card game|card deck/i, "🎲"],

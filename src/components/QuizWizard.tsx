@@ -19,7 +19,7 @@ const MAX_CATEGORIES = 3;
 
 function budgetIdFor(amount: string | null) {
   if (!amount) return "";
-  return BUDGETS.find((budget) => Number(amount) <= budget.max)?.id ?? "100-plus";
+  return BUDGETS.find((budget) => Number(amount) <= budget.max)?.id ?? "300-plus";
 }
 
 function Choice({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
@@ -41,7 +41,7 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
   const [personId, setPersonId] = useState<number | null>(start?.id ?? null);
   const [isNew, setIsNew] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newInterests, setNewInterests] = useState("");
+  const [interestText, setInterestText] = useState(start?.interests ?? "");
   const [giftFor, setGiftFor] = useState(start?.giftFor ?? "no preference");
   const [picked, setPicked] = useState<string[]>([]);
   const [budgetId, setBudgetId] = useState(budgetIdFor(start?.budget ?? null));
@@ -53,7 +53,7 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
   const [isFinding, startFinding] = useTransition();
 
   const person = people.find((p) => p.id === personId);
-  const interests = isNew ? splitInterests(newInterests) : splitInterests(person?.interests ?? null);
+  const interests = splitInterests(interestText);
   const displayName = isNew ? newName.trim() : person?.name;
 
   function choosePerson(id: number) {
@@ -62,6 +62,7 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
     setIsNew(false);
     setGiftFor(chosen.giftFor);
     setBudgetId(budgetIdFor(chosen.budget));
+    setInterestText(chosen.interests ?? "");
     setError("");
   }
 
@@ -192,7 +193,7 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
                 <span className="normal-case">{p.name}</span>
               </Choice>
             ))}
-            <Choice selected={isNew} onClick={() => { setIsNew(true); setPersonId(null); setError(""); }}>
+            <Choice selected={isNew} onClick={() => { setIsNew(true); setPersonId(null); setInterestText(""); setError(""); }}>
               ✨ Someone new
             </Choice>
           </div>
@@ -201,10 +202,6 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
               <div>
                 <label htmlFor="new-name" className="label">Their name</label>
                 <input id="new-name" className="field" placeholder="Priya" value={newName} onChange={(e) => { setNewName(e.target.value); setError(""); }} />
-              </div>
-              <div>
-                <label htmlFor="new-interests" className="label">What are they into?</label>
-                <input id="new-interests" className="field" placeholder="matcha, pottery, plants" value={newInterests} onChange={(e) => setNewInterests(e.target.value)} />
               </div>
             </div>
           )}
@@ -219,6 +216,17 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
             {GIFT_FOR.map((option) => (
               <Choice key={option} selected={giftFor === option} onClick={() => setGiftFor(option)}>{option}</Choice>
             ))}
+          </div>
+          <div className="mt-6">
+            <label htmlFor="interests" className="label">What are they into right now?</label>
+            <input
+              id="interests"
+              className="field"
+              placeholder="perfume, cooking, Zara, gadgets, spa days"
+              value={interestText}
+              onChange={(e) => setInterestText(e.target.value)}
+            />
+            <p className="mt-1 text-sm text-ink/60">The more specific you are, the better the ideas. Separate with commas.</p>
           </div>
         </section>
       )}
