@@ -6,6 +6,11 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
+const googleId = process.env.GOOGLE_CLIENT_ID;
+const googleSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+export const googleEnabled = Boolean(googleId && googleSecret);
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema, usePlural: true }),
   emailAndPassword: {
@@ -13,6 +18,7 @@ export const auth = betterAuth({
     minPasswordLength: 8,
     autoSignIn: true,
   },
+  socialProviders: googleEnabled ? { google: { clientId: googleId!, clientSecret: googleSecret! } } : {},
   plugins: [nextCookies()],
 });
 

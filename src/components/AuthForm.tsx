@@ -35,7 +35,7 @@ function friendly(code: string | undefined, mode: Mode): string {
   }
 }
 
-export function AuthForm({ mode }: { mode: Mode }) {
+export function AuthForm({ mode, googleEnabled }: { mode: Mode; googleEnabled: boolean }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -62,6 +62,15 @@ export function AuthForm({ mode }: { mode: Mode }) {
     }
     router.push("/dashboard");
     router.refresh();
+  }
+
+  async function continueWithGoogle() {
+    setPending(true);
+    const { error } = await authClient.signIn.social({ provider: "google", callbackURL: "/dashboard" });
+    if (error) {
+      setPending(false);
+      setErrors({ form: "Google sign-in didn’t work. Try again, or use your email." });
+    }
   }
 
   // Clear a field's error as soon as the user edits it.
@@ -131,6 +140,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
           ? mode === "signup" ? "Wrapping it up…" : "Logging in…"
           : mode === "signup" ? "Create my account 🎁" : "Log in"}
       </button>
+
+      {googleEnabled && (
+        <>
+          <div className="flex items-center gap-3 text-sm font-semibold text-ink/50">
+            <span className="h-0.5 flex-1 bg-ink/15" /> or <span className="h-0.5 flex-1 bg-ink/15" />
+          </div>
+          <button type="button" onClick={continueWithGoogle} disabled={pending} className="btn-plain w-full">
+            Continue with Google
+          </button>
+        </>
+      )}
 
       <p className="text-center text-sm">
         {mode === "signup" ? (
