@@ -30,7 +30,7 @@ function selectIdeas(userId: string) {
 export type IdeaRow = Awaited<ReturnType<typeof selectIdeas>>[number];
 
 export function listCategories() {
-  return db.select().from(categories).orderBy(asc(categories.id));
+  return db.select().from(categories).orderBy(asc(categories.name));
 }
 
 export async function categoryExists(id: number) {

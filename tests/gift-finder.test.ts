@@ -9,7 +9,7 @@ import {
 } from "@/lib/gift-finder";
 import { BACKUP_GIFTS } from "@/lib/backup-gifts";
 import { BUDGETS } from "@/lib/quiz-options";
-import { findStore, isTrustedUrl } from "@/lib/trusted-stores";
+import { amazonSearch, findStore, isTrustedUrl } from "@/lib/trusted-stores";
 import { giftEmoji } from "@/lib/gift-emoji";
 
 const answers: QuizAnswers = {
@@ -135,7 +135,7 @@ describe("interests shape the results", () => {
   });
 
   it("finds Zara dresses and cooking gifts", () => {
-    expect(titles(["Zara", "dresses"], ["Clothes & accessories"], "50-100")).toMatch(/Zara/);
+    expect(titles(["Zara", "dresses"], ["Clothing"], "50-100")).toMatch(/Zara/);
     expect(titles(["cooking"], ["Food & drink"], "25-50")).toMatch(/spice|Masala|thermometer|Truffle/i);
   });
 });
@@ -154,9 +154,9 @@ describe("new interests", () => {
   });
 
   it("finds accessories, watches, wallets, jackets and home gadgets", () => {
-    expect(titles(["accessories"], ["Clothes & accessories"], "25-50", "her")).toMatch(/necklace|scarf|earrings|clip/i);
-    expect(titles(["watches", "men wallets"], ["Clothes & accessories"], "100-300", "him")).toMatch(/watch|wallet/i);
-    expect(titles(["cool jackets"], ["Clothes & accessories"], "100-300", "him")).toMatch(/jacket/i);
+    expect(titles(["accessories"], ["Accessories"], "25-50", "her")).toMatch(/necklace|scarf|earrings|clip/i);
+    expect(titles(["watches", "men wallets"], ["Accessories"], "100-300", "him")).toMatch(/watch|wallet/i);
+    expect(titles(["cool jackets"], ["Clothing"], "100-300", "him")).toMatch(/jacket/i);
     expect(titles(["home gadgets"], ["Home & cozy", "Gaming & tech"], "50-100", "him")).toMatch(/air fryer|winder|doorbell|vacuum/i);
   });
 });
@@ -166,14 +166,14 @@ describe("relevance: what they're into comes first", () => {
     backupSuggestions({ ...answers, interests, categories, budgetId, giftFor, vibe: "treat" }).map((gift) => gift.title);
 
   it("suggests real sneakers for a sneaker fan, and never silk pajamas", () => {
-    const picks = titles(["sneakers"], ["Clothes & accessories"], "100-300");
+    const picks = titles(["sneakers"], ["Shoes"], "100-300");
     expect(picks.slice(0, 3).join()).toMatch(/Onitsuka|Nike|Adidas|New Balance/);
     expect(picks.join()).not.toMatch(/pajama/i);
   });
 
   it("puts every matching gift before unrelated ones", () => {
-    const picks = titles(["sneakers"], ["Clothes & accessories"], "100-300");
-    const firstUnrelated = picks.findIndex((title) => !/sneaker|Onitsuka|Nike|Adidas|New Balance|Jordan|Samba|Dunk|Chuck|laces|Foot Locker/i.test(title));
+    const picks = titles(["sneakers"], ["Shoes"], "100-300");
+    const firstUnrelated = picks.findIndex((title) => !/sneaker|Onitsuka|Nike|Adidas|New Balance|Jordan|Samba|Dunk|Chuck|laces|Foot Locker|Hoka|keychain/i.test(title));
     const lastSneaker = picks.findLastIndex((title) => /Onitsuka|Nike|Adidas|New Balance|Jordan|Samba|Dunk|Chuck/i.test(title));
     expect(firstUnrelated === -1 || lastSneaker < firstUnrelated).toBe(true);
   });
@@ -187,9 +187,36 @@ describe("relevance: what they're into comes first", () => {
   });
 });
 
+describe("audit fixes", () => {
+  const run = (overrides: Partial<QuizAnswers>) =>
+    backupSuggestions({ ...answers, ...overrides }, () => 0.5);
+
+  it("covers every chosen category, so one interest can't crowd out the rest", () => {
+    const picks = run({ giftFor: "her", interests: ["cooking", "skincare", "Zara", "dresses"], categories: ["Clothing", "Skincare & beauty", "Food & drink"], budgetId: "50-100" });
+    const categories = new Set(picks.map((pick) => pick.category));
+    expect([...categories].sort()).toEqual(["Clothing", "Food & drink", "Skincare & beauty"]);
+  });
+
+  it("still finds sneakers when Clothing is picked instead of Shoes", () => {
+    const picks = run({ giftFor: "him", interests: ["sneakers"], categories: ["Clothing"], budgetId: "100-300" });
+    expect(picks.slice(0, 3).map((pick) => pick.title).join()).toMatch(/Nike|Adidas|New Balance|Onitsuka|Jordan/);
+  });
+
+  it("board games and yoga get real matches", () => {
+    expect(run({ interests: ["board games"], categories: ["Books & hobbies"], budgetId: "25-50" })[0].title).toMatch(/Codenames|Kittens|Azul|Splendor|Catan/);
+    expect(run({ interests: ["yoga"], categories: ["Books & hobbies", "Clothing"], budgetId: "25-50" }).slice(0, 2).map((pick) => pick.title).join()).toMatch(/yoga/i);
+  });
+
+  it("'home gadgets' means gadgets, not candles", () => {
+    const titles = run({ giftFor: "him", interests: ["home gadgets"], categories: ["Home & cozy"], budgetId: "100-300" }).slice(0, 2).map((pick) => pick.title).join();
+    expect(titles).toMatch(/vacuum|fryer|winder|wine opener/i);
+    expect(titles).not.toMatch(/candle|decanter|blanket/i);
+  });
+});
+
 describe("shopping for him or her", () => {
   const titles = (giftFor: string) =>
-    backupSuggestions({ ...answers, giftFor, interests: ["fashion", "luxury", "blazers"], categories: ["Clothes & accessories"], budgetId: "50-100" })
+    backupSuggestions({ ...answers, giftFor, interests: ["fashion", "luxury", "blazers"], categories: ["Clothing", "Accessories"], budgetId: "50-100" })
       .map((gift) => gift.title)
       .join();
 
@@ -215,6 +242,20 @@ describe("every quiz combination gets a full set", () => {
 
   it("every backup gift names a trusted store", () => {
     for (const gift of BACKUP_GIFTS) expect(findStore(gift.store), gift.title).toBeDefined();
+  });
+});
+
+describe("store link formats (checked in a real browser)", () => {
+  it.each([
+    ["Barnes & Noble", "https://www.barnesandnoble.com/search?q=dessert%20person"],
+    ["Nordstrom", "https://www.nordstrom.com/sr?keyword=dessert%20person"],
+    ["Foot Locker", "https://www.footlocker.com/search?query=dessert%20person"],
+  ])("%s", (name, expected) => {
+    expect(findStore(name)!.search("dessert person")).toBe(expected);
+  });
+
+  it("every gift has an Amazon backup search for its own title", () => {
+    expect(amazonSearch("Nike Air Force 1 '07")).toBe("https://www.amazon.com/s?k=Nike%20Air%20Force%201%20'07");
   });
 });
 

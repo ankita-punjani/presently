@@ -1,5 +1,7 @@
 const TINTS: Record<string, string> = {
-  "Clothes & accessories": "bg-pink/35",
+  Clothing: "bg-pink/35",
+  Shoes: "bg-lime/45",
+  Accessories: "bg-lilac/45",
   "Skincare & beauty": "bg-lilac/55",
   "Gaming & tech": "bg-lime/60",
   "Home & cozy": "bg-tangerine/35",

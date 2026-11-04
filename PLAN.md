@@ -249,7 +249,7 @@ The spine (#1–#8) and my 3 features (#9, #10, #11) are never cut.
 | Dashboard test (Section 4) | Changed | Done | Check what a test depends on before ordering the work. | Moved after #10, because it needs a budget. |
 | #9 Birthday countdown | Changed | Done | Emails need an extra service, while a banner is free. | "Reminders" are in-app only. Added a Coming up list. |
 | #10 Budget tracker | Changed | Done | A person's budget has no dates, so it can't be "this season". | Person budgets count everything ever bought for them. |
-| #11 Gift-finder quiz | Changed | Done, but real AI untested | "Generic but working" isn't good enough. Trying it for a real friend showed that. | 8 results, not 5. The AI model changed because the free list had moved on. Added `quiz_runs`, and a backup list of 143 hand-picked gifts carries the quiz until a key is added. |
+| #11 Gift-finder quiz | Changed | Done | "Generic but working" isn't good enough. Trying it for real friends showed that, three times. | 8 results, not 5, and the model changed because the free list had moved on. Gemini AI is confirmed working live. It tries 3 free models in turn, and a hand-picked list of 249 gifts is the backup. Fixes after real use: sneakers giving silk pajamas (#62), one interest crowding out the rest (#71), and the Barnes & Noble links being broken (#71). |
 | #12 Real product photos + trusted links | Changed: photos cut, trusted links kept | Done | Don't ship what you can't verify, and let the person who uses it decide what looks right. | Built and tested with Serper, but the key was rejected live. When I saw the design, I preferred illustrated sticker art to store photos, so photos were removed and every gift got its own emoji art. Trusted store links stayed. |
 | #13 Continue with Google | Shipped | Backlogged until keys are added | Hide features that aren't configured. | The button stays hidden until Google keys are set. |
 | #14 Shareable wishlist | Changed | Done | A public page needs its own privacy check. | The plan had nowhere to store my own wishes, so `wishes` and `wishlist_shares` were added. |
@@ -257,5 +257,6 @@ The spine (#1–#8) and my 3 features (#9, #10, #11) are never cut.
 | #16 Gift roulette | Shipped | Done | Small features add personality. | Shows when a person has 2 or more unbought ideas. |
 | #17 Dark mode | Shipped | Done | Cream text on lime is unreadable. | Bright chips keep dark text. |
 | Design (Section 6) | Shipped | Done | Design is worth its own PR. | Added a landing page, a ticker and a 404 page. Nothing was cut. |
+| Categories (Section 3) | Changed | Done | A category list that seemed fine on paper was too broad in practice. | "Clothes & accessories" was split into Clothing, Shoes and Accessories (#71) after I asked for it, with existing ideas re-sorted by a migration. |
 | Cut list (Section 7) | Not needed | Done | Cutting wasn't necessary because each feature stayed small. | Nothing from the cut list was removed. |
 | Hard $0 rule | Shipped | Done | Check free tiers before committing to a tool. | Claude's API was swapped for Gemini's free tier during planning. |

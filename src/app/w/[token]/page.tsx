@@ -4,6 +4,7 @@ import { getSharedWishlist } from "@/db/queries/wishlist";
 import { formatMoney } from "@/lib/format";
 import { GiftArt } from "@/components/GiftArt";
 import { giftEmoji } from "@/lib/gift-emoji";
+import { amazonSearch } from "@/lib/trusted-stores";
 
 type Props = { params: Promise<{ token: string }> };
 
@@ -35,11 +36,21 @@ export default async function SharedWishlistPage({ params }: Props) {
               <h2 className="mt-3 font-display text-xl font-bold leading-tight">{wish.title}</h2>
               {wish.price && <p className="mt-1 text-sm font-semibold">{formatMoney(wish.price)}</p>}
               {wish.notes && <p className="mt-1 flex-1 text-sm text-ink/70">{wish.notes}</p>}
-              {wish.link && (
-                <a href={wish.link} target="_blank" rel="noopener noreferrer nofollow" className="btn-pink mt-3 self-start px-4 py-2 text-sm">
-                  Shop 🛍️
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                {wish.link && (
+                  <a href={wish.link} target="_blank" rel="noopener noreferrer nofollow" className="btn-pink px-4 py-2 text-sm">
+                    Shop 🛍️
+                  </a>
+                )}
+                <a
+                  href={amazonSearch(wish.title)}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className={wish.link ? "text-sm font-semibold underline decoration-pink decoration-2 underline-offset-4" : "btn-pink px-4 py-2 text-sm"}
+                >
+                  {wish.link ? "Or find it on Amazon →" : "Find it on Amazon 🛍️"}
                 </a>
-              )}
+              </div>
             </li>
           ))}
         </ul>

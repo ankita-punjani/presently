@@ -1,4 +1,4 @@
-import { BACKUP_GIFTS } from "./backup-gifts";
+import { BACKUP_GIFTS, type BackupGift } from "./backup-gifts";
 import { BUDGETS } from "./quiz-options";
 import { TRUSTED_STORES, findStore, storeForCategory } from "./trusted-stores";
 
@@ -165,33 +165,46 @@ const SYNONYMS: Record<string, string[]> = {
   massage: ["massage", "spa"], spa: ["spa", "massage", "self care"], relaxing: ["spa", "self care"],
   electronic: ["tech"], tech: ["tech"], apple: ["tech"], phone: ["tech"],
   blazer: ["blazer", "fashion"], suit: ["blazer", "fashion"], formal: ["blazer", "fashion"],
-  clothe: ["fashion"], clothing: ["fashion"], fashion: ["fashion"], style: ["fashion"], outfit: ["fashion"],
+  clothe: ["fashion", "clothing"], clothing: ["fashion", "clothing"], fashion: ["fashion"], style: ["fashion"], outfit: ["fashion"],
   dress: ["dress", "fashion"], zara: ["zara", "dress", "fashion"], shopping: ["fashion"],
   cooking: ["cooking"], cook: ["cooking"], baking: ["baking", "cooking"], chef: ["cooking"], food: ["cooking"], foodie: ["cooking"],
   kitchen: ["cooking"], spice: ["spices", "cooking"], indian: ["spices", "cooking"],
   skincare: ["skincare"], skin: ["skincare"], beauty: ["beauty", "skincare"], makeup: ["makeup", "beauty"], korean: ["skincare"],
   business: ["travel", "luxury"], flight: ["travel"], flying: ["travel"], travel: ["travel"], traveling: ["travel"], trip: ["travel"], airport: ["travel"],
-  gym: ["fitness"], fitness: ["fitness"], workout: ["fitness"], running: ["running", "fitness"], yoga: ["fitness", "self care"],
+  gym: ["fitness"], fitness: ["fitness"], workout: ["fitness"], running: ["running", "fitness"],
   tea: ["tea"], matcha: ["matcha", "tea"], coffee: ["coffee"], wine: ["wine"], gaming: ["gaming"], game: ["gaming", "games"],
   wedding: ["wedding"], married: ["wedding"], marriage: ["wedding"], newlywed: ["wedding"], bride: ["wedding"], honeymoon: ["wedding", "travel"],
   dessert: ["sweets", "baking"], sweet: ["sweets"], cake: ["baking", "sweets"], bake: ["baking"], baker: ["baking"], pastry: ["baking", "sweets"], chocolate: ["chocolate", "sweets"],
   crochet: ["crochet", "crafts"], knit: ["crochet", "crafts"], knitting: ["crochet", "crafts"], yarn: ["crochet", "crafts"], craft: ["crafts"],
   accessory: ["accessories", "jewelry"], accessorie: ["accessories", "jewelry"], jewelry: ["jewelry", "accessories"], jewellery: ["jewelry", "accessories"], bag: ["accessories"],
   watch: ["watch"], wallet: ["wallet"], jacket: ["jacket"], coat: ["jacket"],
-  gadget: ["tech", "home gadget"], smart: ["home gadget", "tech"], home: ["home", "home gadget"],
-  sneaker: ["sneakers"], sneakers: ["sneakers"], shoe: ["sneakers"], shoes: ["sneakers"], footwear: ["sneakers"], kicks: ["sneakers"],
+  gadget: ["tech", "home gadget"], gadgets: ["tech", "home gadget"], smart: ["home gadget", "tech"], home: ["home"],
+  board: ["board games"], boardgame: ["board games"], boardgames: ["board games"], strategy: ["board games"], puzzle: ["puzzles"], puzzles: ["puzzles"],
+  yoga: ["yoga", "fitness", "self care"], meditation: ["yoga", "self care"], pilates: ["yoga", "fitness"], wellness: ["self care", "yoga"],
+  sneaker: ["sneakers"], sneakers: ["sneakers"], shoe: ["sneakers", "shoes"], shoes: ["sneakers", "shoes"], footwear: ["shoes", "sneakers"], kicks: ["sneakers"],
+  boot: ["shoes"], boots: ["shoes"], heel: ["shoes"], heels: ["shoes"], sandal: ["shoes"], sandals: ["shoes"], flat: ["shoes"], flats: ["shoes"],
+  loafer: ["shoes"], loafers: ["shoes"], clog: ["shoes"], clogs: ["shoes"], slipper: ["shoes", "self care"], slippers: ["shoes", "self care"],
+  hoodie: ["clothing"], sweatshirt: ["clothing"], sweater: ["clothing"], tee: ["clothing"], shirt: ["clothing"], jean: ["clothing"], jeans: ["clothing"],
+  pajama: ["clothing", "self care"], pajamas: ["clothing", "self care"], clothes: ["clothing", "fashion"],
   nike: ["sneakers"], jordan: ["sneakers"], jordans: ["sneakers"], adidas: ["sneakers"], onitsuka: ["sneakers"], balance: ["sneakers"],
   music: ["music"], vinyl: ["vinyl", "music"], reading: ["books"], book: ["books"], art: ["art"], plant: ["plants"], houseplant: ["plants"],
 };
 
-function interestTags(interests: string[]) {
+// In a phrase like "home gadgets" or "men wallets", words like "home" and "men" only
+// describe the main word, so on their own they shouldn't match candles or menswear.
+const DESCRIBING_WORDS = new Set(["home", "men", "mens", "women", "womens", "cool", "nice", "good", "fancy", "new", "and", "the", "for", "of", "his", "her", "their", "big", "little"]);
+
+export function interestTags(interests: string[]) {
   const tags = new Set<string>();
   for (const interest of interests) {
-    tags.add(interest.toLowerCase());
-    for (const word of interest.toLowerCase().split(/\s+/)) {
+    const phrase = interest.trim().toLowerCase();
+    if (!phrase) continue;
+    tags.add(phrase);
+    const words = phrase.split(/\s+/);
+    for (const word of words) {
       const stem = word.replace(/(es|s)$/, "");
-      for (const key of [word, stem, word.replace(/s$/, "")]) {
-        tags.add(key);
+      for (const key of new Set([word, stem, word.replace(/s$/, "")])) {
+        if (!(words.length > 1 && DESCRIBING_WORDS.has(key))) tags.add(key);
         for (const tag of SYNONYMS[key] ?? []) tags.add(tag);
       }
     }
@@ -199,56 +212,74 @@ function interestTags(interests: string[]) {
   return tags;
 }
 
+type Ranked = { gift: BackupGift; matched: string[]; score: number };
+
+// Takes the best from each category in turn, so one interest can't crowd out the rest.
+function takeTurns(entries: Ranked[], categories: string[]) {
+  const queues = categories.map((category) => entries.filter((entry) => entry.gift.category === category));
+  const result: Ranked[] = [];
+  while (queues.some((queue) => queue.length)) {
+    for (const queue of queues) {
+      const next = queue.shift();
+      if (next) result.push(next);
+    }
+  }
+  return result;
+}
+
 export function backupSuggestions(answers: QuizAnswers, random = Math.random): Suggestion[] {
   const budget = budgetFor(answers.budgetId);
-  const inCategories = BACKUP_GIFTS.filter(
+  const wanted = interestTags(answers.interests);
+  const picked = new Set(answers.categories);
+
+  const eligible = BACKUP_GIFTS.filter(
     (gift) =>
-      answers.categories.includes(gift.category) &&
       gift.price <= budget.max &&
       // "them" and "no preference" see everything. Otherwise skip gifts clearly for the other.
       (!gift.for || !["him", "her"].includes(answers.giftFor) || gift.for === answers.giftFor),
   );
-  const unseen = inCategories.filter((gift) => !answers.alreadyShown.includes(gift.title));
+  const unseen = eligible.filter((gift) => !answers.alreadyShown.includes(gift.title));
   // Once everything's been shown, start over rather than coming up empty.
-  const pool = unseen.length > 0 ? unseen : inCategories;
+  const pool = unseen.some((gift) => picked.has(gift.category)) ? unseen : eligible;
 
-  const wanted = interestTags(answers.interests);
-
-  const scored = pool
+  const ranked: Ranked[] = pool
     .map((gift) => {
-      const matches = gift.tags.filter((tag) => wanted.has(tag));
-      const fitsBudget = gift.price >= budget.min && gift.price <= budget.max;
+      const fitsBudget = gift.price >= budget.min;
       const fitsVibe = gift.vibes.includes(answers.vibe);
       // The random part keeps results from feeling repetitive.
       const score = (fitsBudget ? 5 : 0) + (fitsVibe ? 2 : 0) + random() * 3;
-      return { gift, tag: matches[0], matches: matches.length, score };
+      return { gift, matched: gift.tags.filter((tag) => wanted.has(tag)), score };
     })
-    // Gifts matching more of their interests always come first.
-    .sort((a, b) => b.matches - a.matches || b.score - a.score);
+    .sort((a, b) => b.matched.length - a.matched.length || b.score - a.score);
 
-  const matching = scored.filter((entry) => entry.matches > 0).map(toSuggestion);
-  const others = scored.filter((entry) => entry.matches === 0).map(toSuggestion);
+  const inPicked = ranked.filter((entry) => picked.has(entry.gift.category));
+  const matching = takeTurns(inPicked.filter((entry) => entry.matched.length), answers.categories);
+  const others = takeTurns(inPicked.filter((entry) => !entry.matched.length), answers.categories);
 
-  // An interest nothing on the list covers gets a store search for exactly that,
-  // never a random gift that just happens to score well.
-  const known = new Set(BACKUP_GIFTS.flatMap((gift) => gift.tags));
+  // Too few matches in the chosen categories? Their interests win: pull the best
+  // matches from other categories too (a sneaker fan gets sneakers even under "Clothing").
+  const borrowed =
+    matching.length < 3 ? ranked.filter((entry) => !picked.has(entry.gift.category) && entry.matched.length).slice(0, 4) : [];
+
+  // An interest nothing covers gets a store search for exactly that, never a random gift in its place.
+  const covered = new Set([...matching, ...borrowed].flatMap((entry) => entry.matched));
   const searches = answers.interests
-    .filter((interest) => ![...interestTags([interest])].some((tag) => known.has(tag)))
+    .filter((interest) => interest.trim() && ![...interestTags([interest])].some((tag) => covered.has(tag)))
     .slice(0, 3)
     .map((interest) => searchSuggestion(interest, answers.categories[0]))
     .filter((search) => !answers.alreadyShown.includes(search.title));
 
-  return [...matching, ...searches, ...others].slice(0, RESULT_COUNT);
+  return [...matching.map(toSuggestion), ...borrowed.map(toSuggestion), ...searches, ...others.map(toSuggestion)].slice(0, RESULT_COUNT);
 
-  function toSuggestion({ gift, tag }: { gift: (typeof BACKUP_GIFTS)[number]; tag?: string }): Suggestion {
+  function toSuggestion({ gift, matched }: Ranked): Suggestion {
     const store = findStore(gift.store)!;
     const vibeWords = VIBE_WORDS[answers.vibe] ?? "a great pick";
     return {
       title: gift.title,
       whyItFits:
         gift.why ??
-        (tag
-          ? `Perfect for someone into ${tag}, and ${vibeWords}.`
+        (matched[0]
+          ? `Perfect for someone into ${matched[0]}, and ${vibeWords}.`
           : `${vibeWords.replace(/^./, (c) => c.toUpperCase())}, right in your budget.`),
       price: gift.price,
       category: gift.category,

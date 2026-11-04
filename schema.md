@@ -52,7 +52,7 @@ erDiagram
 | created_at | timestamp | |
 
 ### categories
-A shared list of 7, seeded in a migration.
+A shared list of 9, seeded in migrations: Accessories, Books & hobbies, Clothing, Experiences, Food & drink, Gaming & tech, Home & cozy, Shoes, Skincare & beauty. The plan had 7. "Clothes & accessories" was split into Clothing, Shoes and Accessories in #71.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -134,7 +134,7 @@ A row here makes that user's wishlist public at `/w/<token>`.
 |---|---|---|
 | users | Yes | Also has `image` and `updated_at`, which Better Auth needs |
 | people | Yes | `birthday` needs a full date, while the plan said the year was optional |
-| categories | Yes | Matches the plan |
+| categories | Changed | 9, not 7: "Clothes & accessories" was split into Clothing, Shoes and Accessories (#71) |
 | gift_ideas | Yes | Matches the plan |
 | stars | Yes | Matches the plan |
 | budgets | Yes | Also has `created_at` |

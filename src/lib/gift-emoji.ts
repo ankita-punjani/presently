@@ -1,4 +1,10 @@
 const EMOJI: [RegExp, string][] = [
+  [/codenames|exploding kittens|card game/i, "🃏"], [/azul|splendor|catan|ticket to ride|wingspan|board game/i, "🎲"],
+  [/yoga|meditation|eye pillow/i, "🧘"], [/wellness journal/i, "📔"], [/tennis bracelet/i, "💎"], [/pumps/i, "👠"], [/golden goose/i, "👟"],
+  [/silk twill scarf/i, "🧣"], [/leather tote/i, "👜"],
+  [/chelsea boot|boots?\b/i, "👢"], [/loafer|shoe shine/i, "👞"], [/ballet flat/i, "🩰"], [/sandal/i, "👡"], [/clog|ugg|slipper/i, "🥿"], [/hoka/i, "👟"],
+  [/graphic tee|oxford shirt|button-up/i, "👕"], [/leggings|jeans|pajama pants/i, "👖"], [/holiday sweater/i, "🎄"], [/sweatshirt|hoodie/i, "👚"],
+  [/keychain/i, "🔑"], [/reed diffuser/i, "🌿"], [/enamel pin/i, "📌"], [/phone charm/i, "📱"],
   [/gua sha|roller/i, "💎"], [/sunrise alarm/i, "🌅"], [/scrunchie/i, "🎀"], [/base layer/i, "🎽"], [/eye gel|patches/i, "👁️"],
   [/framed print/i, "🖼️"], [/weekender/i, "🧳"], [/drunk elephant/i, "🐘"], [/charging stand/i, "🔋"], [/towel/i, "🛁"], [/cocotte/i, "💗"],
   [/sneaker|onitsuka|air force|samba|new balance|dunk|jordan|pegasus|chuck|laces/i, "👟"], [/gift finds/i, "🔎"],
