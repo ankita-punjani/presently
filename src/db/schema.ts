@@ -173,3 +173,13 @@ export const wishlistShares = pgTable("wishlist_shares", {
   token: text("token").notNull().unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+// A row here means this user's birthdays are published as a private calendar feed
+// at /api/calendar/<token>.ics. Delete it to stop syncing.
+export const calendarFeeds = pgTable("calendar_feeds", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});

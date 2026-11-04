@@ -20,7 +20,7 @@ const STEPS = [
 const FEATURES = [
   { emoji: "🔮", title: "Gift-finder quiz", body: "5 quick questions, 8 ideas that actually fit, with links to stores you trust.", tint: "bg-lilac/40" },
   { emoji: "🎂", title: "Birthday countdowns", body: "Reminders 14 days out and a calendar of everyone you love.", tint: "bg-tangerine/30" },
-  { emoji: "📅", title: "Birthday calendar", body: "Every birthday on one calendar, so nobody gets forgotten.", tint: "bg-lime/40" },
+  { emoji: "📅", title: "Calendar sync", body: "Import birthdays from Google, Apple or Outlook, and see them all in your own calendar.", tint: "bg-lime/40" },
   { emoji: "📊", title: "Your gifting, wrapped", body: "Big colorful stats on where your money goes.", tint: "bg-pink/20" },
   { emoji: "✨", title: "Your own wishlist", body: "Send one link so people finally know what you want.", tint: "bg-lilac/40" },
   { emoji: "🎲", title: "Gift roulette", body: "Can’t decide? Let fate pick from your saved ideas.", tint: "bg-tangerine/30" },
