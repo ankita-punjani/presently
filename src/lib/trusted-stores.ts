@@ -15,7 +15,8 @@ export const TRUSTED_STORES: Store[] = [
   { name: "Apple", hosts: ["apple.com"], search: (s) => `https://www.apple.com/us/search/${q(s)}` },
   { name: "REI", hosts: ["rei.com"], search: (s) => `https://www.rei.com/search?q=${q(s)}` },
   { name: "Uncommon Goods", hosts: ["uncommongoods.com"], search: (s) => `https://www.uncommongoods.com/search?q=${q(s)}` },
-  { name: "Barnes & Noble", hosts: ["barnesandnoble.com"], search: (s) => `https://www.barnesandnoble.com/s/${q(s)}` },
+  // Checked in a browser: /search?q= opens results, the older /s/<query> path returns 404.
+  { name: "Barnes & Noble", hosts: ["barnesandnoble.com"], search: (s) => `https://www.barnesandnoble.com/search?q=${q(s)}` },
   { name: "Nike", hosts: ["nike.com"], search: (s) => `https://www.nike.com/w?q=${q(s)}` },
   { name: "Adidas", hosts: ["adidas.com"], search: (s) => `https://www.adidas.com/us/search?q=${q(s)}` },
   { name: "New Balance", hosts: ["newbalance.com"], search: (s) => `https://www.newbalance.com/search?q=${q(s)}` },
@@ -49,7 +50,9 @@ export function isTrustedUrl(url: string) {
 }
 
 const DEFAULT_STORE: Record<string, string> = {
-  "Clothes & accessories": "Nordstrom",
+  Clothing: "Nordstrom",
+  Shoes: "Foot Locker",
+  Accessories: "Nordstrom",
   "Skincare & beauty": "Sephora",
   "Gaming & tech": "Best Buy",
   "Home & cozy": "Target",
@@ -60,4 +63,9 @@ const DEFAULT_STORE: Record<string, string> = {
 
 export function storeForCategory(category: string) {
   return findStore(DEFAULT_STORE[category] ?? "Amazon")!;
+}
+
+// A backup on every gift, in case the main store's link doesn't work for someone.
+export function amazonSearch(query: string) {
+  return findStore("Amazon")!.search(query);
 }

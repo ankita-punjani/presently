@@ -57,6 +57,13 @@
       "when": 1793587140318,
       "tag": "0007_wishlist",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793775667271,
+      "tag": "0008_split_clothing",
+      "breakpoints": true
     }
   ]
 }

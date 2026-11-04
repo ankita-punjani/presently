@@ -8,6 +8,7 @@ import { getIdea } from "@/db/queries/gift-ideas";
 import { requireUser } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
 import { giftEmoji } from "@/lib/gift-emoji";
+import { amazonSearch } from "@/lib/trusted-stores";
 import { parseId } from "@/lib/params";
 import { deleteIdeaAction } from "../actions";
 
@@ -64,11 +65,21 @@ export default async function IdeaPage({ params }: { params: Promise<{ id: strin
           </div>
         )}
 
-        {idea.link && (
-          <a href={idea.link} target="_blank" rel="noopener noreferrer" className="btn-pink mt-6">
-            Go shop 🛍️
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          {idea.link && (
+            <a href={idea.link} target="_blank" rel="noopener noreferrer" className="btn-pink">
+              Go shop 🛍️
+            </a>
+          )}
+          <a
+            href={amazonSearch(idea.title)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={idea.link ? "text-sm font-semibold underline decoration-pink decoration-2 underline-offset-4" : "btn-pink"}
+          >
+            {idea.link ? "Not there? Find it on Amazon →" : "Find it on Amazon 🛍️"}
           </a>
-        )}
+        </div>
       </div>
     </div>
   );

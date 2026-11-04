@@ -6,6 +6,7 @@ import type { SaveResult } from "@/app/quiz/actions";
 import type { Suggestion } from "@/lib/gift-finder";
 import { formatMoney } from "@/lib/format";
 import { giftEmoji } from "@/lib/gift-emoji";
+import { amazonSearch } from "@/lib/trusted-stores";
 import { GiftArt } from "./GiftArt";
 
 type Props = {
@@ -33,6 +34,17 @@ export function SuggestionCard({ suggestion, emoji, onSave }: Props) {
         <p className="mt-2 flex-1 text-sm text-ink/80">{suggestion.whyItFits}</p>
 
         {saved?.error && <p role="alert" className="mt-2 text-sm font-semibold text-pink">{saved.error}</p>}
+
+        {suggestion.store !== "Amazon" && (
+          <a
+            href={amazonSearch(suggestion.title)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 text-sm font-semibold underline decoration-pink decoration-2 underline-offset-4"
+          >
+            Not there? Find it on Amazon →
+          </a>
+        )}
 
         <div className="mt-4 flex flex-wrap gap-2">
           <a href={suggestion.link} target="_blank" rel="noopener noreferrer" className="btn-pink px-4 py-2 text-sm">
