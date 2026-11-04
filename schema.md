@@ -72,7 +72,7 @@ The main item in the app.
 | title | text | Required |
 | price | number | Optional |
 | link | text | Only http/https links are kept |
-| image_url | text | From product search |
+| image_url | text | Unused since product photos were removed (#64) |
 | store | text | Optional |
 | status | text | idea / bought / given |
 | occasion | text | birthday / holiday / graduation / thank-you / just because |
@@ -124,7 +124,7 @@ A row here makes that user's wishlist public at `/w/<token>`.
 | Table | What it holds |
 |---|---|
 | quiz_runs | One row per AI quiz run, for the daily limit of 10 |
-| product_cache | Saved shopping searches for 7 days. No personal data. |
+| product_cache | Unused since product photos were removed (#64). Kept rather than deleting a table from the live database. |
 | sessions | One row per logged-in browser, deleted on log out |
 | accounts | How a user signs in. For email sign-ups, this holds the hashed password. |
 | verifications | Short-lived tokens |

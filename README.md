@@ -9,7 +9,7 @@ Create a free account and build your own gift tracker:
 
 - **People:** birthdays, budgets, interests and notes for everyone you shop for
 - **Gift ideas:** save them by person and category, and track them from idea → bought → given, with confetti at the end 🎉
-- **Gift-finder quiz:** 5 quick questions, 8 ideas that fit, with links to trusted stores
+- **Gift-finder quiz:** 5 quick questions, 8 ideas that fit, each with its own sticker art and a link to a trusted store
 - **Search, filter and sort** your ideas, and star your favorites
 - **Dashboard:** spending stats, a chart by category, and birthday reminders
 - **Budgets:** track a season's spending and a budget per person
@@ -31,7 +31,6 @@ Everything is private: you only ever see your own data.
 | Recharts | Dashboard chart |
 | canvas-confetti | Confetti |
 | Google Gemini (optional) | AI gift ideas |
-| Serper (optional) | Real product photos |
 | Vitest | Tests |
 | Vercel | Hosting, with a new deploy on every merge to `main` |
 | Claude Code | AI coding agent |
@@ -63,7 +62,7 @@ You'll need Node.js and a free [Neon](https://neon.tech) database.
    npm run dev
    ```
 
-**Optional keys:** without them the app still works fully. The quiz uses a hand-picked list of 143 gifts, and the Google button stays hidden. See `.env.example` for `GEMINI_API_KEY`, `SERPER_API_KEY` and the Google keys.
+**Optional keys:** without them the app still works fully. The quiz uses a hand-picked list of 208 gifts, and the Google button stays hidden. See `.env.example` for `GEMINI_API_KEY` and the Google keys.
 
 ## Tests
 Tests start the real app and use a separate database, so they never touch real data. Put a test `DATABASE_URL`, `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL="http://localhost:3100"` in `.env.test`, stop any running dev server, then:

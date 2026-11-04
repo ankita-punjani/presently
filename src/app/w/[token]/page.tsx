@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSharedWishlist } from "@/db/queries/wishlist";
 import { formatMoney } from "@/lib/format";
+import { GiftArt } from "@/components/GiftArt";
 import { giftEmoji } from "@/lib/gift-emoji";
 
 type Props = { params: Promise<{ token: string }> };
@@ -30,8 +31,8 @@ export default async function SharedWishlistPage({ params }: Props) {
         <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {wishlist.items.map((wish) => (
             <li key={wish.id} className="sticker flex flex-col p-5 transition hover:-rotate-1">
-              <p className="text-4xl" aria-hidden>{giftEmoji(wish.title, "🎁")}</p>
-              <h2 className="mt-2 font-display text-xl font-bold leading-tight">{wish.title}</h2>
+              <GiftArt emoji={giftEmoji(wish.title, "🎁")} category="Experiences" size="sm" />
+              <h2 className="mt-3 font-display text-xl font-bold leading-tight">{wish.title}</h2>
               {wish.price && <p className="mt-1 text-sm font-semibold">{formatMoney(wish.price)}</p>}
               {wish.notes && <p className="mt-1 flex-1 text-sm text-ink/70">{wish.notes}</p>}
               {wish.link && (
