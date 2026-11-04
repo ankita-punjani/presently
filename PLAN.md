@@ -257,6 +257,6 @@ The spine (#1–#8) and my 3 features (#9, #10, #11) are never cut.
 | #16 Gift roulette | Shipped | Done | Small features add personality. | Shows when a person has 2 or more unbought ideas. |
 | #17 Dark mode | Shipped | Done | Cream text on lime is unreadable. | Bright chips keep dark text. |
 | Design (Section 6) | Shipped | Done | Design is worth its own PR. | Added a landing page, a ticker and a 404 page. Nothing was cut. |
-| Categories (Section 3) | Changed | Done | A category list that seemed fine on paper was too broad in practice. | "Clothes & accessories" was split into Clothing, Shoes and Accessories (#71) after I asked for it, with existing ideas re-sorted by a migration. |
+| Categories (Section 3) | Changed twice | Done | Categories should cover everything without overlapping, plus a way out. | I asked for the clothing split (#71). Then my stranger test said the categories didn't cover everything, so I added Sports & outdoors, Travel, Pets, Kids & baby and ✨ Other with your own words (#79). |
 | Cut list (Section 7) | Not needed | Done | Cutting wasn't necessary because each feature stayed small. | Nothing from the cut list was removed. |
 | Hard $0 rule | Shipped | Done | Check free tiers before committing to a tool. | Claude's API was swapped for Gemini's free tier during planning. |

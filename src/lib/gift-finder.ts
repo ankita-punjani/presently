@@ -10,6 +10,8 @@ export type QuizAnswers = {
   vibe: string;
   interests: string[];
   alreadyShown: string[];
+  // Typed in when "Other" is picked, e.g. "plants" or "music lessons".
+  otherCategory?: string;
 };
 
 export type Suggestion = {
@@ -46,6 +48,7 @@ export function buildPrompt(answers: QuizAnswers) {
     `Shopping for: ${answers.giftFor}`,
     `Their interests: ${answers.interests.join(", ") || "not given"}`,
     `Use only these categories: ${answers.categories.join(", ")}`,
+    ...(answers.otherCategory ? [`"Other" here means: ${answers.otherCategory}`] : []),
     `Price range: $${budget.min} to $${budget.max} USD`,
     `Occasion: ${answers.occasion}`,
     `Vibe: ${answers.vibe}`,
@@ -187,6 +190,14 @@ const SYNONYMS: Record<string, string[]> = {
   hoodie: ["clothing"], sweatshirt: ["clothing"], sweater: ["clothing"], tee: ["clothing"], shirt: ["clothing"], jean: ["clothing"], jeans: ["clothing"],
   pajama: ["clothing", "self care"], pajamas: ["clothing", "self care"], clothes: ["clothing", "fashion"],
   nike: ["sneakers"], jordan: ["sneakers"], jordans: ["sneakers"], adidas: ["sneakers"], onitsuka: ["sneakers"], balance: ["sneakers"],
+  pet: ["pets"], pets: ["pets"], dog: ["pets", "dogs"], dogs: ["pets", "dogs"], puppy: ["pets", "dogs"], cat: ["pets", "cats"], cats: ["pets", "cats"], kitten: ["pets", "cats"],
+  kid: ["kids"], kids: ["kids"], child: ["kids"], children: ["kids"], toddler: ["kids", "baby"], baby: ["baby", "kids"], newborn: ["baby"], toy: ["kids"], toys: ["kids"],
+  sport: ["sports"], sports: ["sports"], golf: ["golf", "sports"], tennis: ["tennis", "sports"], pickleball: ["pickleball", "sports"], camping: ["camping", "outdoors"],
+  hiking: ["hiking", "outdoors"], hike: ["hiking", "outdoors"], outdoor: ["outdoors"], outdoors: ["outdoors"], surfing: ["water sports", "outdoors"],
+  concert: ["concerts", "music"], concerts: ["concerts", "music"], comedy: ["comedy"], theater: ["theater"], theatre: ["theater"], broadway: ["theater"], musical: ["theater", "music"],
+  adventure: ["adventure"], adventurous: ["adventure"], thrill: ["adventure"], adrenaline: ["adventure"], learning: ["learning"],
+  car: ["cars"], cars: ["cars"],
+  experience: ["adventure", "learning"], experiences: ["adventure", "learning"],
   music: ["music"], vinyl: ["vinyl", "music"], reading: ["books"], book: ["books"], art: ["art"], plant: ["plants"], houseplant: ["plants"],
 };
 
@@ -212,11 +223,51 @@ export function interestTags(interests: string[]) {
   return tags;
 }
 
-type Ranked = { gift: BackupGift; matched: string[]; score: number };
+const KNOWN_TAGS = new Set(BACKUP_GIFTS.flatMap((gift) => gift.tags));
+
+type InterestMatcher = { interest: string; phrase: string; groups: { all: Set<string>; direct: Set<string> }[] };
+
+// Every meaningful word in an interest has to match, so "car accessories" doesn't match
+// earrings and "board games" doesn't match video games. Words the list knows nothing
+// about ("days" in "spa days") are skipped rather than blocking a match.
+function interestMatchers(interests: string[]): InterestMatcher[] {
+  return interests
+    .map((interest) => interest.trim())
+    .filter(Boolean)
+    .map((interest) => {
+      const phrase = interest.toLowerCase();
+      const words = phrase.split(/\s+/).filter((word) => !(phrase.includes(" ") && DESCRIBING_WORDS.has(word)));
+      const groups = words
+        .map((word) => ({
+          all: new Set([...interestTags([word])].filter((tag) => KNOWN_TAGS.has(tag))),
+          // The word itself ("golf"), as opposed to a looser synonym ("sports").
+          direct: new Set([word, word.replace(/(es|s)$/, ""), word.replace(/s$/, "")]),
+        }))
+        .filter((group) => group.all.size > 0);
+      return { interest, phrase, groups };
+    });
+}
+
+function matchingTags(matcher: InterestMatcher, tags: string[]) {
+  if (tags.includes(matcher.phrase)) return [matcher.phrase];
+  if (matcher.groups.length === 0) return [];
+  const hits = matcher.groups.map((group) => tags.find((tag) => group.direct.has(tag)) ?? tags.find((tag) => group.all.has(tag)));
+  return hits.every(Boolean) ? (hits as string[]) : [];
+}
+
+// A direct match ("golf" on a golf gift) counts double a synonym match ("sports").
+function matchStrength(matcher: InterestMatcher, tags: string[]) {
+  const hits = matchingTags(matcher, tags);
+  if (hits.length === 0) return 0;
+  if (hits[0] === matcher.phrase) return 2;
+  return hits.reduce((sum, tag, index) => sum + (matcher.groups[index]?.direct.has(tag) ? 2 : 1), 0) / hits.length;
+}
+
+type Ranked = { gift: BackupGift; matched: string[]; strength: number; score: number };
 
 // Takes the best from each category in turn, so one interest can't crowd out the rest.
-function takeTurns(entries: Ranked[], categories: string[]) {
-  const queues = categories.map((category) => entries.filter((entry) => entry.gift.category === category));
+function takeTurns(entries: Ranked[], categories: string[], extraQueues: Ranked[][] = []) {
+  const queues = [...categories.map((category) => entries.filter((entry) => entry.gift.category === category)), ...extraQueues];
   const result: Ranked[] = [];
   while (queues.some((queue) => queue.length)) {
     for (const queue of queues) {
@@ -229,8 +280,13 @@ function takeTurns(entries: Ranked[], categories: string[]) {
 
 export function backupSuggestions(answers: QuizAnswers, random = Math.random): Suggestion[] {
   const budget = budgetFor(answers.budgetId);
-  const wanted = interestTags(answers.interests);
-  const picked = new Set(answers.categories);
+  const other = answers.categories.includes("Other") ? (answers.otherCategory ?? "").trim() : "";
+  const chosen = answers.categories.filter((category) => category !== "Other");
+  // Only "Other" picked? Look across every category for what they typed.
+  const categories = chosen.length ? chosen : [...new Set(BACKUP_GIFTS.map((gift) => gift.category))];
+  const interests = other ? [...answers.interests, other] : answers.interests;
+  const matchers = interestMatchers(interests);
+  const picked = new Set(categories);
 
   const eligible = BACKUP_GIFTS.filter(
     (gift) =>
@@ -248,13 +304,21 @@ export function backupSuggestions(answers: QuizAnswers, random = Math.random): S
       const fitsVibe = gift.vibes.includes(answers.vibe);
       // The random part keeps results from feeling repetitive.
       const score = (fitsBudget ? 5 : 0) + (fitsVibe ? 2 : 0) + random() * 3;
-      return { gift, matched: gift.tags.filter((tag) => wanted.has(tag)), score };
+      const matched = matchers.flatMap((matcher) => matchingTags(matcher, gift.tags));
+      const strength = matchers.reduce((sum, matcher) => sum + matchStrength(matcher, gift.tags), 0);
+      return { gift, matched, strength, score };
     })
-    .sort((a, b) => b.matched.length - a.matched.length || b.score - a.score);
+    .sort((a, b) => b.strength - a.strength || b.score - a.score);
 
   const inPicked = ranked.filter((entry) => picked.has(entry.gift.category));
-  const matching = takeTurns(inPicked.filter((entry) => entry.matched.length), answers.categories);
-  const others = takeTurns(inPicked.filter((entry) => !entry.matched.length), answers.categories);
+  // What they typed for "Other" gets its own turn, from any category.
+  const otherMatcher = matchers.find((matcher) => other && matcher.interest === other);
+  const otherQueue = otherMatcher
+    ? ranked.filter((entry) => !picked.has(entry.gift.category) && matchingTags(otherMatcher, entry.gift.tags).length)
+    : [];
+  const matching = takeTurns(inPicked.filter((entry) => entry.matched.length), categories, [otherQueue]);
+  // Only "Other" picked: unrelated filler from random categories would be noise, so skip it.
+  const others = chosen.length ? takeTurns(inPicked.filter((entry) => !entry.matched.length), categories) : [];
 
   // Too few matches in the chosen categories? Their interests win: pull the best
   // matches from other categories too (a sneaker fan gets sneakers even under "Clothing").
@@ -262,14 +326,23 @@ export function backupSuggestions(answers: QuizAnswers, random = Math.random): S
     matching.length < 3 ? ranked.filter((entry) => !picked.has(entry.gift.category) && entry.matched.length).slice(0, 4) : [];
 
   // An interest nothing covers gets a store search for exactly that, never a random gift in its place.
-  const covered = new Set([...matching, ...borrowed].flatMap((entry) => entry.matched));
-  const searches = answers.interests
-    .filter((interest) => interest.trim() && ![...interestTags([interest])].some((tag) => covered.has(tag)))
+  const shown = [...matching, ...borrowed];
+  const searches = matchers
+    .filter((matcher) => !shown.some((entry) => matchingTags(matcher, entry.gift.tags).length))
     .slice(0, 3)
-    .map((interest) => searchSuggestion(interest, answers.categories[0]))
+    .flatMap(({ interest }) =>
+      interest === other && !chosen.length
+        ? ["Amazon", "Etsy", "Target"].map((store) => searchSuggestion(interest, "Other", store))
+        : [searchSuggestion(interest, interest === other ? "Other" : categories[0])],
+    )
     .filter((search) => !answers.alreadyShown.includes(search.title));
 
-  return [...matching.map(toSuggestion), ...borrowed.map(toSuggestion), ...searches, ...others.map(toSuggestion)].slice(0, RESULT_COUNT);
+  // Searches always make the cut, so an uncovered interest is never pushed off the list.
+  const room = Math.max(RESULT_COUNT - searches.length, 0);
+  const picks = [...matching, ...borrowed].slice(0, room).map(toSuggestion);
+  // Only "Other" picked: what they typed is the point, so it leads.
+  const ordered = chosen.length ? [...picks, ...searches] : [...searches, ...picks];
+  return [...ordered, ...others.map(toSuggestion)].slice(0, RESULT_COUNT);
 
   function toSuggestion({ gift, matched }: Ranked): Suggestion {
     const store = findStore(gift.store)!;
@@ -291,8 +364,8 @@ export function backupSuggestions(answers: QuizAnswers, random = Math.random): S
   }
 }
 
-function searchSuggestion(interest: string, category: string): Suggestion {
-  const store = storeForCategory(category);
+function searchSuggestion(interest: string, category: string, storeName?: string): Suggestion {
+  const store = (storeName && findStore(storeName)) || storeForCategory(category);
   const name = interest.trim().replace(/^./, (c) => c.toUpperCase());
   return {
     title: `${name} gift finds at ${store.name}`,

@@ -103,6 +103,8 @@ export const giftIdeas = pgTable("gift_ideas", {
   source: text("source").notNull().default("manual"),
   boughtOn: date("bought_on"),
   notes: text("notes"),
+  // Set when the category is "Other": what kind of gift this is, in the user's words.
+  customCategory: text("custom_category"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

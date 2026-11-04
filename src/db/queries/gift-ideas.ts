@@ -7,7 +7,7 @@ export type IdeaInput = Pick<
   typeof giftIdeas.$inferInsert,
   "personId" | "categoryId" | "title" | "price" | "link" | "store" | "status" | "occasion" | "boughtOn" | "notes"
 > &
-  Partial<Pick<typeof giftIdeas.$inferInsert, "imageUrl" | "source">>;
+  Partial<Pick<typeof giftIdeas.$inferInsert, "imageUrl" | "source" | "customCategory">>;
 
 const ideaWithNames = {
   idea: giftIdeas,
@@ -30,12 +30,13 @@ function selectIdeas(userId: string) {
 export type IdeaRow = Awaited<ReturnType<typeof selectIdeas>>[number];
 
 export function listCategories() {
-  return db.select().from(categories).orderBy(asc(categories.name));
+  // Alphabetical, with "Other" always last.
+  return db.select().from(categories).orderBy(sql`${categories.name} = 'Other'`, asc(categories.name));
 }
 
-export async function categoryExists(id: number) {
-  const [row] = await db.select({ id: categories.id }).from(categories).where(eq(categories.id, id));
-  return Boolean(row);
+export async function getCategory(id: number) {
+  const [row] = await db.select().from(categories).where(eq(categories.id, id));
+  return row ?? null;
 }
 
 export type IdeaFilters = {

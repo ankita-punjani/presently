@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  categoryExists,
+  getCategory,
   createIdea,
   deleteIdea,
   getIdea,
@@ -18,7 +18,7 @@ import { todayString } from "@/lib/dates";
 import { OCCASIONS, STATUSES } from "@/lib/idea-options";
 import { cleanLink, readValues, validateIdea, type FormState } from "@/lib/validation";
 
-const FIELDS = ["title", "personId", "newPersonName", "categoryId", "price", "occasion", "status", "store", "link", "notes"];
+const FIELDS = ["title", "personId", "newPersonName", "categoryId", "customCategory", "price", "occasion", "status", "store", "link", "notes"];
 
 const NOT_YOUR_PERSON = "Who’s this gift for? Pick someone from your list.";
 
@@ -48,19 +48,21 @@ async function resolvePerson(userId: string, values: FormState["values"]) {
 
 async function validate(values: FormState["values"]) {
   const errors = validateIdea(values);
-  if (!errors.categoryId && !(await categoryExists(Number(values.categoryId)))) {
-    errors.categoryId = "Pick a category so you can find it later.";
-  }
-  return errors;
+  const category = errors.categoryId ? null : await getCategory(Number(values.categoryId));
+  if (!errors.categoryId && !category) errors.categoryId = "Pick a category so you can find it later.";
+  // "Other" needs the user's own words for what kind of gift it is.
+  const isOther = category?.name === "Other";
+  if (isOther && !values.customCategory) errors.customCategory = "What kind of gift is it? For example: plants, music lessons.";
+  return { errors, customCategory: isOther ? values.customCategory.slice(0, 60) : null };
 }
 
 export async function createIdeaAction(_prev: FormState, form: FormData): Promise<FormState> {
   const user = await requireUser();
   const values = readValues(form, FIELDS);
-  const errors = await validate(values);
+  const { errors, customCategory } = await validate(values);
   if (Object.keys(errors).length) return { errors, values };
 
-  const idea = await createIdea(user.id, toInput(await resolvePerson(user.id, values), null));
+  const idea = await createIdea(user.id, { ...toInput(await resolvePerson(user.id, values), null), customCategory });
   if (!idea) return { errors: { personId: NOT_YOUR_PERSON }, values };
   revalidatePath("/", "layout");
   redirect(`/ideas/${idea.id}`);
@@ -72,10 +74,13 @@ export async function updateIdeaAction(id: number, _prev: FormState, form: FormD
   if (!existing) redirect("/ideas");
 
   const values = readValues(form, FIELDS);
-  const errors = await validate(values);
+  const { errors, customCategory } = await validate(values);
   if (Object.keys(errors).length) return { errors, values };
 
-  const idea = await updateIdea(user.id, id, toInput(await resolvePerson(user.id, values), existing.idea.boughtOn));
+  const idea = await updateIdea(user.id, id, {
+    ...toInput(await resolvePerson(user.id, values), existing.idea.boughtOn),
+    customCategory,
+  });
   if (!idea) return { errors: { personId: NOT_YOUR_PERSON }, values };
   revalidatePath("/", "layout");
   redirect(`/ideas/${id}`);

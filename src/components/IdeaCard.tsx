@@ -15,7 +15,7 @@ export function IdeaCard({ row, showPerson = false }: { row: IdeaRow; showPerson
         <GiftArt emoji={giftEmoji(idea.title, categoryEmoji)} category={categoryName} size="sm" />
         <h3 className="mt-3 pr-8 font-display text-xl font-bold leading-tight">{idea.title}</h3>
         <p className="mt-1 text-sm text-ink/70">
-          {showPerson ? `For ${personName}` : categoryName}
+          {showPerson ? `For ${personName}` : (idea.customCategory ?? categoryName)}
           {idea.price && ` · ${formatMoney(idea.price)}`}
         </p>
         <div className="mt-3"><StatusPill status={idea.status} /></div>

@@ -52,7 +52,7 @@ erDiagram
 | created_at | timestamp | |
 
 ### categories
-A shared list of 9, seeded in migrations: Accessories, Books & hobbies, Clothing, Experiences, Food & drink, Gaming & tech, Home & cozy, Shoes, Skincare & beauty. The plan had 7. "Clothes & accessories" was split into Clothing, Shoes and Accessories in #71.
+A shared list of 14, seeded in migrations: Accessories, Books & hobbies, Clothing, Experiences, Food & drink, Gaming & tech, Home & cozy, Kids & baby, Pets, Shoes, Skincare & beauty, Sports & outdoors, Travel, and Other. The plan had 7. "Clothes & accessories" was split in #71, and the rest were added after my stranger test (#79) so the list covers everything without overlapping.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -79,6 +79,7 @@ The main item in the app.
 | source | text | manual / suggested |
 | bought_on | date | Set automatically on purchase |
 | notes | text | Optional |
+| custom_category | text | When the category is "Other": the user's own words, e.g. "vinyl and record players" |
 | created_at | timestamp | |
 
 ### stars (junction table)
@@ -136,7 +137,7 @@ A row here makes that user's wishlist public at `/w/<token>`.
 |---|---|---|
 | users | Yes | Also has `image` and `updated_at`, which Better Auth needs |
 | people | Yes | `birthday` needs a full date, while the plan said the year was optional |
-| categories | Changed | 9, not 7: "Clothes & accessories" was split into Clothing, Shoes and Accessories (#71) |
+| categories | Changed | 14, not 7: split clothing (#71), then Sports & outdoors, Travel, Pets, Kids & baby and Other after the stranger test (#79) |
 | gift_ideas | Yes | Matches the plan |
 | stars | Yes | Matches the plan |
 | budgets | Yes | Also has `created_at` |
