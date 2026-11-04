@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-type Progress = { person: boolean; idea: boolean; star: boolean; budget: boolean; wish: boolean };
+type Progress = { person: boolean; idea: boolean; star: boolean; birthday: boolean; wish: boolean };
 
 const STEPS: { key: keyof Progress; label: string; href: string }[] = [
   { key: "person", label: "Add someone you shop for", href: "/people/new" },
   { key: "idea", label: "Save a gift idea, or find one with the quiz 🔮", href: "/quiz" },
   { key: "star", label: "Star your favorite idea ⭐", href: "/ideas" },
-  { key: "budget", label: "Set a budget for the holidays 💸", href: "/budgets/new" },
+  { key: "birthday", label: "Add someone’s birthday 🎂", href: "/people" },
   { key: "wish", label: "Add something you want to your wishlist ✨", href: "/wishlist" },
 ];
 

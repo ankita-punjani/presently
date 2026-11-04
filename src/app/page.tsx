@@ -9,18 +9,18 @@ const FLOATERS = [
   { emoji: "🔮", place: "right-[9%] top-64", tilt: "-8deg", delay: "2.4s" },
 ];
 
-const TICKER = ["Never miss a birthday", "Save every gift hint", "Spend what you planned", "Find the perfect gift", "Share your wishlist", "Free for everyone"];
+const TICKER = ["Never miss a birthday", "Save every gift hint", "Remember every birthday", "Find the perfect gift", "Share your wishlist", "Free for everyone"];
 
 const STEPS = [
   { emoji: "👯", title: "Add your people", body: "Birthdays, budgets, and what they’re into right now." },
   { emoji: "💡", title: "Save ideas all year", body: "They mention a perfume in July? Saved before you forget it." },
-  { emoji: "🎉", title: "Show up with the perfect gift", body: "Get a countdown, stick to a budget, and enjoy the confetti." },
+  { emoji: "🎉", title: "Show up with the perfect gift", body: "Get a countdown before the big day, then enjoy the confetti." },
 ];
 
 const FEATURES = [
   { emoji: "🔮", title: "Gift-finder quiz", body: "5 quick questions, 8 ideas that actually fit, with links to stores you trust.", tint: "bg-lilac/40" },
   { emoji: "🎂", title: "Birthday countdowns", body: "Reminders 14 days out and a calendar of everyone you love.", tint: "bg-tangerine/30" },
-  { emoji: "💸", title: "Budget tracker", body: "See spending per season and per person before December sneaks up.", tint: "bg-lime/40" },
+  { emoji: "📅", title: "Birthday calendar", body: "Every birthday on one calendar, so nobody gets forgotten.", tint: "bg-lime/40" },
   { emoji: "📊", title: "Your gifting, wrapped", body: "Big colorful stats on where your money goes.", tint: "bg-pink/20" },
   { emoji: "✨", title: "Your own wishlist", body: "Send one link so people finally know what you want.", tint: "bg-lilac/40" },
   { emoji: "🎲", title: "Gift roulette", body: "Can’t decide? Let fate pick from your saved ideas.", tint: "bg-tangerine/30" },

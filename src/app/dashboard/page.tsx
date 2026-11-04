@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BirthdayBanner } from "@/components/BirthdayBanner";
-import { BudgetBar } from "@/components/BudgetBar";
 import { GettingStarted } from "@/components/GettingStarted";
 import { birthdayLabel } from "@/components/BirthdayChip";
 import { SpendChart } from "@/components/SpendChart";
@@ -16,7 +15,7 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const firstName = user.name.split(" ")[0];
 
-  const [people, birthdays, { budget, seasonLabel, stats }, progress] = await Promise.all([
+  const [people, birthdays, { seasonLabel, stats }, progress] = await Promise.all([
     listPeople(user.id),
     listUpcomingBirthdays(user.id),
     getDashboard(user.id),
@@ -54,20 +53,6 @@ export default async function DashboardPage() {
             <StatCard label="Average gift" value={formatMoney(stats.averageGift)} tint="bg-lime/50" tilt="rotate-1" />
             <StatCard label="Gifts bought" value={String(stats.giftsBought)} tint="bg-tangerine/30" tilt="-rotate-1" />
             <StatCard label="Ideas not bought yet" value={String(stats.ideasNotBought)} tint="bg-lilac/40" tilt="rotate-1" />
-          </section>
-
-          <section className="sticker mt-8 p-5 sm:p-6">
-            {budget ? (
-              <>
-                <h2 className="mb-3 font-display text-2xl font-bold">{budget.name} budget</h2>
-                <BudgetBar spent={stats.totalSpent} amount={Number(budget.amount)} />
-              </>
-            ) : (
-              <p className="font-semibold">
-                Shopping for a season?{" "}
-                <Link href="/budgets/new" className="underline decoration-pink decoration-2 underline-offset-4">Set a budget</Link>
-              </p>
-            )}
           </section>
 
           <section className="sticker mt-8 p-5 sm:p-6">

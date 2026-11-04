@@ -20,10 +20,6 @@ export type DashboardStats = {
 
 const round = (cents: number) => Math.round(cents) / 100;
 
-export function spentInRange(rows: StatRow[], range: DateRange) {
-  return computeStats(rows, range).totalSpent;
-}
-
 // A gift counts as spending once it's bought or given, on a date inside the range.
 // Sums use whole cents because 0.1 + 0.2 isn't exactly 0.3 in floating point.
 export function computeStats(rows: StatRow[], range: DateRange): DashboardStats {

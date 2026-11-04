@@ -89,6 +89,8 @@ The main item in the app.
 | created_at | timestamp | |
 
 ### budgets
+No longer used in the app since the Budgets tab was removed (#77). The table is kept rather than deleting data from the live database.
+
 | Column | Type | Notes |
 |---|---|---|
 | id | number | Primary key |

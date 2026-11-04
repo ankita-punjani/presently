@@ -12,7 +12,6 @@ Create a free account and build your own gift tracker:
 - **Gift-finder quiz:** 5 quick questions, 8 ideas that fit, each with its own sticker art and a link to a trusted store
 - **Search, filter and sort** your ideas, and star your favorites
 - **Dashboard:** spending stats, a chart by category, and birthday reminders
-- **Budgets:** track a season's spending and a budget per person
 - **Calendar:** every birthday on a month view
 - **Wishlist:** list what you want and share a private link
 - **Gift roulette:** let fate pick when you can't decide
