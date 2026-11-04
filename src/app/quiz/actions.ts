@@ -41,7 +41,7 @@ export async function findGiftsAction(input: QuizAnswers): Promise<QuizResult> {
   };
   if (answers.categories.length === 0) return { suggestions: [], source: "backup" };
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (apiKey && (await hasAiRunsLeft(user.id))) {
     try {
       await db.insert(quizRuns).values({ userId: user.id });

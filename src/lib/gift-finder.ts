@@ -100,7 +100,8 @@ export async function fetchAiIdeas(answers: QuizAnswers, apiKey: string) {
       }),
     },
   );
-  if (!response.ok) throw new Error(`Gemini returned ${response.status}`);
+  // The reason helps tell a bad key from a bad request. It never contains the key.
+  if (!response.ok) throw new Error(`Gemini returned ${response.status}: ${(await response.text()).slice(0, 300)}`);
 
   const body = await response.json();
   const text: string | undefined = body?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -153,6 +154,8 @@ const SYNONYMS: Record<string, string[]> = {
   accessory: ["accessories", "jewelry"], accessorie: ["accessories", "jewelry"], jewelry: ["jewelry", "accessories"], jewellery: ["jewelry", "accessories"], bag: ["accessories"],
   watch: ["watch"], wallet: ["wallet"], jacket: ["jacket"], coat: ["jacket"],
   gadget: ["tech", "home gadget"], smart: ["home gadget", "tech"], home: ["home", "home gadget"],
+  sneaker: ["sneakers"], sneakers: ["sneakers"], shoe: ["sneakers"], shoes: ["sneakers"], footwear: ["sneakers"], kicks: ["sneakers"],
+  nike: ["sneakers"], jordan: ["sneakers"], jordans: ["sneakers"], adidas: ["sneakers"], onitsuka: ["sneakers"], balance: ["sneakers"],
   music: ["music"], vinyl: ["vinyl", "music"], reading: ["books"], book: ["books"], art: ["art"], plant: ["plants"], houseplant: ["plants"],
 };
 
@@ -191,14 +194,28 @@ export function backupSuggestions(answers: QuizAnswers, random = Math.random): S
       const matches = gift.tags.filter((tag) => wanted.has(tag));
       const fitsBudget = gift.price >= budget.min && gift.price <= budget.max;
       const fitsVibe = gift.vibes.includes(answers.vibe);
-      // Interests matter most. The random part keeps results from feeling repetitive.
-      const score = matches.length * 6 + (fitsBudget ? 5 : 0) + (fitsVibe ? 2 : 0) + random() * 3;
-      return { gift, tag: matches[0], score };
+      // The random part keeps results from feeling repetitive.
+      const score = (fitsBudget ? 5 : 0) + (fitsVibe ? 2 : 0) + random() * 3;
+      return { gift, tag: matches[0], matches: matches.length, score };
     })
-    .sort((a, b) => b.score - a.score);
+    // Gifts matching more of their interests always come first.
+    .sort((a, b) => b.matches - a.matches || b.score - a.score);
 
-  // Gifts in the budget range come first, and cheaper ones fill the list. Never pricier.
-  return scored.slice(0, RESULT_COUNT).map(({ gift, tag }) => {
+  const matching = scored.filter((entry) => entry.matches > 0).map(toSuggestion);
+  const others = scored.filter((entry) => entry.matches === 0).map(toSuggestion);
+
+  // An interest nothing on the list covers gets a store search for exactly that,
+  // never a random gift that just happens to score well.
+  const known = new Set(BACKUP_GIFTS.flatMap((gift) => gift.tags));
+  const searches = answers.interests
+    .filter((interest) => ![...interestTags([interest])].some((tag) => known.has(tag)))
+    .slice(0, 3)
+    .map((interest) => searchSuggestion(interest, answers.categories[0]))
+    .filter((search) => !answers.alreadyShown.includes(search.title));
+
+  return [...matching, ...searches, ...others].slice(0, RESULT_COUNT);
+
+  function toSuggestion({ gift, tag }: { gift: (typeof BACKUP_GIFTS)[number]; tag?: string }): Suggestion {
     const store = findStore(gift.store)!;
     const vibeWords = VIBE_WORDS[answers.vibe] ?? "a great pick";
     return {
@@ -215,5 +232,20 @@ export function backupSuggestions(answers: QuizAnswers, random = Math.random): S
       imageUrl: null,
       searchTerms: gift.title,
     };
-  });
+  }
+}
+
+function searchSuggestion(interest: string, category: string): Suggestion {
+  const store = storeForCategory(category);
+  const name = interest.trim().replace(/^./, (c) => c.toUpperCase());
+  return {
+    title: `${name} gift finds at ${store.name}`,
+    whyItFits: `They’re into ${interest.trim()}, so this opens a ${store.name} search for exactly that.`,
+    price: 0,
+    category,
+    store: store.name,
+    link: store.search(`${interest.trim()} gift`),
+    imageUrl: null,
+    searchTerms: `${interest.trim()} gift`,
+  };
 }

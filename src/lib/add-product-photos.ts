@@ -22,12 +22,16 @@ async function productsFor(searchTerms: string, apiKey: string) {
 
 // A failed lookup leaves the suggestion as it was, with its store search link.
 export async function addProductPhotos(suggestions: Suggestion[], budgetId: string) {
-  const apiKey = process.env.SERPER_API_KEY;
+  const apiKey = process.env.SERPER_API_KEY?.trim();
   if (!apiKey) return suggestions;
   const maxPrice = BUDGETS.find((budget) => budget.id === budgetId)?.max ?? Number.POSITIVE_INFINITY;
 
+  // A rejected key fails every lookup the same way, so stop after the first one.
+  let keyRejected = false;
+
   return Promise.all(
     suggestions.map(async (suggestion) => {
+      if (keyRejected) return suggestion;
       try {
         const product = pickProduct(await productsFor(suggestion.searchTerms, apiKey), maxPrice);
         if (!product) return suggestion;
@@ -39,6 +43,7 @@ export async function addProductPhotos(suggestions: Suggestion[], budgetId: stri
           link: product.link,
         };
       } catch (error) {
+        if (/returned 40[13]/.test(String(error))) keyRejected = true;
         console.error("Product lookup failed:", error);
         return suggestion;
       }

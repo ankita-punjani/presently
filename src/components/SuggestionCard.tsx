@@ -28,7 +28,7 @@ export function SuggestionCard({ suggestion, emoji, onSave }: Props) {
       <div className="flex flex-1 flex-col p-5">
         <h2 className="font-display text-xl font-bold leading-tight">{suggestion.title}</h2>
         <p className="mt-1 text-sm font-semibold">
-          ~{formatMoney(suggestion.price)} · <span className="text-ink/70">✓ {suggestion.store}</span>
+          {suggestion.price > 0 ? `~${formatMoney(suggestion.price)}` : "Prices vary"} · <span className="text-ink/70">✓ {suggestion.store}</span>
         </p>
         <p className="mt-2 flex-1 text-sm text-ink/80">{suggestion.whyItFits}</p>
 
