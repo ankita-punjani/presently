@@ -61,7 +61,7 @@ You'll need Node.js and a free [Neon](https://neon.tech) database.
    npm run dev
    ```
 
-**Optional keys:** without them the app still works fully. The quiz uses a hand-picked list of 249 gifts, and the Google button stays hidden. See `.env.example` for `GEMINI_API_KEY` and the Google keys.
+**Optional keys:** without them the app still works fully. The quiz uses a hand-picked list of 316 gifts, and the Google button stays hidden. See `.env.example` for `GEMINI_API_KEY` and the Google keys.
 
 ## Tests
 Tests start the real app and use a separate database, so they never touch real data. Put a test `DATABASE_URL`, `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL="http://localhost:3100"` in `.env.test`, stop any running dev server, then:

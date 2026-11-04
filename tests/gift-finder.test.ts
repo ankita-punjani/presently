@@ -214,6 +214,44 @@ describe("audit fixes", () => {
   });
 });
 
+describe("new categories and Other", () => {
+  const run = (overrides: Partial<QuizAnswers>) => backupSuggestions({ ...answers, ...overrides }, () => 0.5);
+
+  it("Other with their own words searches every category for it", () => {
+    const picks = run({ categories: ["Other"], otherCategory: "plants", interests: [], budgetId: "25-50" });
+    expect(picks.slice(0, 3).map((pick) => pick.title).join()).toMatch(/pothos|planter|field guide/i);
+  });
+
+  it("Other with words nothing covers gets exact store searches, and no random filler", () => {
+    const picks = run({ categories: ["Other"], otherCategory: "car accessories", interests: [], budgetId: "25-50" });
+    expect(picks.map((pick) => pick.store)).toEqual(["Amazon", "Etsy", "Target"]);
+    expect(picks.every((pick) => pick.title.startsWith("Car accessories gift finds") && pick.category === "Other")).toBe(true);
+  });
+
+  it("Other alone puts what they typed first, even with saved interests", () => {
+    const picks = run({ categories: ["Other"], otherCategory: "car accessories", interests: ["cooking", "skincare"], budgetId: "25-50" });
+    expect(picks.slice(0, 3).every((pick) => pick.title.startsWith("Car accessories gift finds"))).toBe(true);
+  });
+
+  it("Other gets its own share of results next to a picked category", () => {
+    const picks = run({ interests: ["dogs"], categories: ["Pets", "Other"], otherCategory: "hiking", budgetId: "25-50" });
+    expect(picks.some((pick) => /headlamp|hydro flask|daypack|hiking/i.test(pick.title))).toBe(true);
+    expect(picks.filter((pick) => pick.category === "Pets").length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("pets, kids, travel and sports each get real matches", () => {
+    expect(run({ interests: ["dog"], categories: ["Pets"], budgetId: "25-50" })[0].title).toMatch(/dog|pet|bandana|puzzle|lick/i);
+    expect(run({ interests: ["toddler"], categories: ["Kids & baby"], budgetId: "25-50" })[0].category).toBe("Kids & baby");
+    expect(run({ interests: ["travel"], categories: ["Travel"], budgetId: "25-50" })[0].category).toBe("Travel");
+    expect(run({ interests: ["golf"], categories: ["Sports & outdoors"], budgetId: "25-50" })[0].title).toMatch(/golf/i);
+  });
+
+  it("experiences cover concerts, comedy and adventures", () => {
+    expect(run({ interests: ["concerts"], categories: ["Experiences"], budgetId: "100-300" })[0].title).toMatch(/concert/i);
+    expect(run({ interests: ["adventure"], categories: ["Experiences"], budgetId: "100-300" })[0].title).toMatch(/race car|balloon|skydiv|helicopter/i);
+  });
+});
+
 describe("shopping for him or her", () => {
   const titles = (giftFor: string) =>
     backupSuggestions({ ...answers, giftFor, interests: ["fashion", "luxury", "blazers"], categories: ["Clothing", "Accessories"], budgetId: "50-100" })

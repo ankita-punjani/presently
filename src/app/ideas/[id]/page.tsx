@@ -33,7 +33,7 @@ export default async function IdeaPage({ params }: { params: Promise<{ id: strin
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">{idea.title}</h1>
-            <p className="mt-1 text-ink/70">For {personName} · {categoryName}</p>
+            <p className="mt-1 text-ink/70">For {personName} · {idea.customCategory ? `${idea.customCategory} (Other)` : categoryName}</p>
             <div className="mt-4"><StatusButtons ideaId={idea.id} status={idea.status} /></div>
           </div>
           <div className="flex items-center gap-3">

@@ -21,6 +21,11 @@ export const TRUSTED_STORES: Store[] = [
   { name: "Adidas", hosts: ["adidas.com"], search: (s) => `https://www.adidas.com/us/search?q=${q(s)}` },
   { name: "New Balance", hosts: ["newbalance.com"], search: (s) => `https://www.newbalance.com/search?q=${q(s)}` },
   { name: "Foot Locker", hosts: ["footlocker.com"], search: (s) => `https://www.footlocker.com/search?query=${q(s)}` },
+  { name: "Ticketmaster", hosts: ["ticketmaster.com"], search: (s) => `https://www.ticketmaster.com/search?q=${q(s)}` },
+  { name: "Airbnb", hosts: ["airbnb.com"], search: (s) => `https://www.airbnb.com/s/experiences?query=${q(s)}` },
+  { name: "Virgin Gifts", hosts: ["virgingifts.com"], search: (s) => `https://www.virgingifts.com/search?query=${q(s)}` },
+  { name: "Fandango", hosts: ["fandango.com"], search: () => "https://www.fandango.com/" },
+  { name: "MasterClass", hosts: ["masterclass.com"], search: () => "https://www.masterclass.com/" },
   { name: "Zara", hosts: ["zara.com"], search: (s) => `https://www.zara.com/us/en/search?searchTerm=${q(s)}` },
   { name: "Williams Sonoma", hosts: ["williams-sonoma.com"], search: (s) => `https://www.williams-sonoma.com/search/results.html?words=${q(s)}` },
   { name: "Bloomingdale's", hosts: ["bloomingdales.com"], search: (s) => `https://www.bloomingdales.com/shop/search?keyword=${q(s)}` },
@@ -58,7 +63,12 @@ const DEFAULT_STORE: Record<string, string> = {
   "Home & cozy": "Target",
   "Food & drink": "Amazon",
   "Books & hobbies": "Barnes & Noble",
-  Experiences: "Uncommon Goods",
+  Experiences: "Airbnb",
+  "Sports & outdoors": "REI",
+  Travel: "Amazon",
+  Pets: "Amazon",
+  "Kids & baby": "Target",
+  Other: "Amazon",
 };
 
 export function storeForCategory(category: string) {

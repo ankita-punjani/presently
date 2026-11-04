@@ -37,6 +37,7 @@ export async function findGiftsAction(input: QuizAnswers): Promise<QuizResult> {
     vibe: VIBES.some((v) => v.id === input.vibe) ? input.vibe : "fun",
     interests: input.interests.map((interest) => interest.trim().slice(0, 40)).filter(Boolean).slice(0, 8),
     alreadyShown: input.alreadyShown.map((title) => title.slice(0, 120)).slice(-30),
+    otherCategory: (input.otherCategory ?? "").trim().slice(0, 60) || undefined,
   };
   if (answers.categories.length === 0) return { suggestions: [], source: "backup" };
 
@@ -61,6 +62,7 @@ export async function saveSuggestionAction(input: {
   interests: string[];
   giftFor: string;
   occasion: string;
+  otherCategory?: string;
   suggestion: Suggestion;
 }): Promise<SaveResult> {
   const user = await requireUser();
@@ -98,6 +100,7 @@ export async function saveSuggestionAction(input: {
     status: "idea",
     source: "suggested",
     notes: suggestion.whyItFits.slice(0, 500),
+    customCategory: category.name === "Other" ? (input.otherCategory ?? "").trim().slice(0, 60) || null : null,
     boughtOn: null,
   });
   if (!idea) return { error: "Pick someone from your list." };

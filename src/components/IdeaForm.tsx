@@ -24,6 +24,9 @@ export function IdeaForm({ action, people, categories, idea, personId, cancelHre
   const field = (id: string, extraClass?: string) => fieldProps(id, errors, extraClass);
   const startingPerson = String(values.personId ?? idea?.personId ?? personId ?? (people.length === 0 ? "new" : ""));
   const [addingPerson, setAddingPerson] = useState(startingPerson === "new");
+  const otherId = String(categories.find((c) => c.name === "Other")?.id ?? "");
+  const startingCategory = String(values.categoryId ?? idea?.categoryId ?? "");
+  const [isOther, setIsOther] = useState(startingCategory !== "" && startingCategory === otherId);
 
   return (
     // key: remount after a failed save so selects show what was submitted too.
@@ -54,11 +57,18 @@ export function IdeaForm({ action, people, categories, idea, personId, cancelHre
         </div>
         <div>
           <label htmlFor="categoryId" className="label">Category</label>
-          <select {...field("categoryId")} defaultValue={values.categoryId ?? idea?.categoryId ?? ""}>
+          <select {...field("categoryId")} defaultValue={startingCategory} onChange={(e) => setIsOther(e.target.value === otherId)}>
             <option value="" disabled>Pick a category</option>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
           </select>
           <FieldError id="categoryId" message={errors.categoryId} />
+          {isOther && (
+            <div className="mt-2">
+              <label htmlFor="customCategory" className="sr-only">What kind of gift?</label>
+              <input {...field("customCategory")} placeholder="What kind of gift? e.g. plants, music lessons" defaultValue={values.customCategory ?? idea?.customCategory ?? ""} />
+              <FieldError id="customCategory" message={errors.customCategory} />
+            </div>
+          )}
         </div>
         <div>
           <label htmlFor="price" className="label">Price ($)</label>

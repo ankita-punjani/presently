@@ -1,4 +1,13 @@
 const EMOJI: [RegExp, string][] = [
+  [/resistance band|jump rope|foam roller/i, "🏋️"], [/running waist belt/i, "🏃"], [/headlamp/i, "🔦"], [/hydro flask/i, "🥤"], [/golf/i, "⛳"],
+  [/pickleball|tennis racket/i, "🎾"], [/daypack/i, "🎒"], [/hammock/i, "🏕️"], [/paddle board/i, "🏄"],
+  [/packing cubes|toiletry|carry-on|suitcase/i, "🧳"], [/passport/i, "🛂"], [/travel adapter/i, "🔌"], [/travel journal/i, "📔"], [/travel pillow/i, "😴"], [/airtag/i, "📍"],
+  [/catnip|cat tree/i, "🐱"], [/pet bandana|dog dna|puzzle feeder|lick mat|pet id tag/i, "🐶"], [/treat jar|pet bed|grooming|pet portrait|pet feeder|pet camera/i, "🐾"],
+  [/sticker activity|board book/i, "📚"], [/bath toy/i, "🛁"], [/plush toy/i, "🧸"], [/kids art kit/i, "🖍️"], [/kids headphones/i, "🎧"], [/stacking toy|building tiles|lego/i, "🧱"],
+  [/baby blanket|baby carrier/i, "👶"], [/balance bike/i, "🚲"], [/audio player/i, "🎶"],
+  [/movie tickets/i, "🍿"], [/comedy/i, "🎤"], [/paint and sip/i, "🎨"], [/candle-making/i, "🕯️"], [/escape room/i, "🔐"], [/pottery wheel/i, "🏺"], [/photography walking/i, "📷"],
+  [/food tour/i, "🍜"], [/sports game/i, "🏟️"], [/indoor skydiving|tandem skydive/i, "🪂"], [/sailing/i, "⛵"], [/concert/i, "🎸"], [/masterclass/i, "🎓"], [/theater/i, "🎭"],
+  [/race car/i, "🏎️"], [/hot air balloon/i, "🎈"], [/helicopter/i, "🚁"],
   [/codenames|exploding kittens|card game/i, "🃏"], [/azul|splendor|catan|ticket to ride|wingspan|board game/i, "🎲"],
   [/yoga|meditation|eye pillow/i, "🧘"], [/wellness journal/i, "📔"], [/tennis bracelet/i, "💎"], [/pumps/i, "👠"], [/golden goose/i, "👟"],
   [/silk twill scarf/i, "🧣"], [/leather tote/i, "👜"],

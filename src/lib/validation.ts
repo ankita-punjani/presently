@@ -63,6 +63,7 @@ export function validateIdea(values: Values) {
   if (!values.title) errors.title = "What’s the gift? Give it a name 🎁";
   checkLength(errors, "title", values.title, 200, "That name");
   checkLength(errors, "store", values.store, 100, "That store name");
+  checkLength(errors, "customCategory", values.customCategory ?? "", 60, "That category");
   checkLength(errors, "notes", values.notes, 2000, "That note");
   if (values.personId === "new") {
     if (!values.newPersonName) errors.newPersonName = "Who’s it for? Type their name.";

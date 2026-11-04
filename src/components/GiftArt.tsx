@@ -8,6 +8,11 @@ const TINTS: Record<string, string> = {
   "Food & drink": "bg-tangerine/55",
   "Books & hobbies": "bg-lilac/35",
   Experiences: "bg-pink/20",
+  "Sports & outdoors": "bg-lime/50",
+  Travel: "bg-tangerine/40",
+  Pets: "bg-tangerine/30",
+  "Kids & baby": "bg-pink/30",
+  Other: "bg-lilac/40",
 };
 
 type Props = { emoji: string; category: string; size?: "lg" | "sm" };

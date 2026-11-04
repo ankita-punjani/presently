@@ -44,6 +44,7 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
   const [interestText, setInterestText] = useState(start?.interests ?? "");
   const [giftFor, setGiftFor] = useState(start?.giftFor ?? "no preference");
   const [picked, setPicked] = useState<string[]>([]);
+  const [otherCategory, setOtherCategory] = useState("");
   const [budgetId, setBudgetId] = useState(budgetIdFor(start?.budget ?? null));
   const [occasion, setOccasion] = useState("");
   const [vibe, setVibe] = useState("");
@@ -77,7 +78,11 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
   const missing = [
     !personId && !newName.trim() ? "Pick someone, or type a name." : "",
     "",
-    picked.length === 0 ? "Pick at least one category." : "",
+    picked.length === 0
+      ? "Pick at least one category."
+      : picked.includes("Other") && !otherCategory.trim()
+        ? "Tell us what kind of gift for “Other”."
+        : "",
     !budgetId ? "Pick a budget." : "",
     !occasion || !vibe ? "Pick an occasion and a vibe." : "",
   ][step];
@@ -92,6 +97,7 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
         vibe,
         interests,
         alreadyShown: shown,
+        otherCategory,
       });
       setResult(found);
       setShown([...shown, ...found.suggestions.map((suggestion) => suggestion.title)]);
@@ -112,6 +118,7 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
       interests,
       giftFor,
       occasion,
+      otherCategory,
       suggestion,
     });
     // A new person now exists, so later saves attach to them.
@@ -242,6 +249,18 @@ export function QuizWizard({ people, categories, startPersonId }: Props) {
               </Choice>
             ))}
           </div>
+          {picked.includes("Other") && (
+            <div className="mt-5">
+              <label htmlFor="other-category" className="label">What kind of gift?</label>
+              <input
+                id="other-category"
+                className="field"
+                placeholder="plants, music lessons, car stuff…"
+                value={otherCategory}
+                onChange={(e) => { setOtherCategory(e.target.value); setError(""); }}
+              />
+            </div>
+          )}
         </section>
       )}
 
