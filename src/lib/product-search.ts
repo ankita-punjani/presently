@@ -34,7 +34,7 @@ export async function fetchProducts(searchTerms: string, apiKey: string) {
     signal: AbortSignal.timeout(TIMEOUT_MS),
     body: JSON.stringify({ q: searchTerms, gl: "us" }),
   });
-  if (!response.ok) throw new Error(`Serper returned ${response.status}`);
+  if (!response.ok) throw new Error(`Serper returned ${response.status}: ${(await response.text()).slice(0, 300)}`);
   return parseProducts(await response.json(), searchTerms);
 }
 

@@ -138,6 +138,32 @@ describe("new interests", () => {
   });
 });
 
+describe("relevance: what they're into comes first", () => {
+  const titles = (interests: string[], categories: string[], budgetId: string, giftFor = "him") =>
+    backupSuggestions({ ...answers, interests, categories, budgetId, giftFor, vibe: "treat" }).map((gift) => gift.title);
+
+  it("suggests real sneakers for a sneaker fan, and never silk pajamas", () => {
+    const picks = titles(["sneakers"], ["Clothes & accessories"], "100-300");
+    expect(picks.slice(0, 3).join()).toMatch(/Onitsuka|Nike|Adidas|New Balance/);
+    expect(picks.join()).not.toMatch(/pajama/i);
+  });
+
+  it("puts every matching gift before unrelated ones", () => {
+    const picks = titles(["sneakers"], ["Clothes & accessories"], "100-300");
+    const firstUnrelated = picks.findIndex((title) => !/sneaker|Onitsuka|Nike|Adidas|New Balance|Jordan|Samba|Dunk|Chuck|laces|Foot Locker/i.test(title));
+    const lastSneaker = picks.findLastIndex((title) => /Onitsuka|Nike|Adidas|New Balance|Jordan|Samba|Dunk|Chuck/i.test(title));
+    expect(firstUnrelated === -1 || lastSneaker < firstUnrelated).toBe(true);
+  });
+
+  it("an interest nothing covers gets a store search for exactly that", () => {
+    const picks = backupSuggestions({ ...answers, interests: ["Formula 1"], categories: ["Books & hobbies"], budgetId: "25-50" });
+    const search = picks.find((pick) => pick.title.startsWith("Formula 1 gift finds"));
+    expect(search).toBeDefined();
+    expect(isTrustedUrl(search!.link)).toBe(true);
+    expect(search!.link).toContain("Formula%201");
+  });
+});
+
 describe("shopping for him or her", () => {
   const titles = (giftFor: string) =>
     backupSuggestions({ ...answers, giftFor, interests: ["fashion", "luxury", "blazers"], categories: ["Clothes & accessories"], budgetId: "50-100" })
