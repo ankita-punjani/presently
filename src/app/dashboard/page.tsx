@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { BirthdayBanner } from "@/components/BirthdayBanner";
 import { BudgetBar } from "@/components/BudgetBar";
+import { GettingStarted } from "@/components/GettingStarted";
 import { birthdayLabel } from "@/components/BirthdayChip";
 import { SpendChart } from "@/components/SpendChart";
 import { StatCard } from "@/components/StatCard";
-import { getDashboard } from "@/db/queries/dashboard";
+import { getDashboard, getSetupProgress } from "@/db/queries/dashboard";
 import { listPeople, listUpcomingBirthdays } from "@/db/queries/people";
 import { requireUser } from "@/lib/auth";
 import { formatBirthday, formatMoney } from "@/lib/format";
@@ -15,10 +16,11 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const firstName = user.name.split(" ")[0];
 
-  const [people, birthdays, { budget, seasonLabel, stats }] = await Promise.all([
+  const [people, birthdays, { budget, seasonLabel, stats }, progress] = await Promise.all([
     listPeople(user.id),
     listUpcomingBirthdays(user.id),
     getDashboard(user.id),
+    getSetupProgress(user.id),
   ]);
 
   return (
@@ -27,6 +29,8 @@ export default async function DashboardPage() {
         Hey {firstName} <span aria-hidden>✨</span>
       </h1>
       <p className="mt-2 text-ink/70">Here’s your gifting so far in {seasonLabel}.</p>
+
+      <GettingStarted progress={progress} />
 
       {people.length === 0 ? (
         <div className="sticker mt-8 -rotate-1 bg-lime/40 p-8 text-center">
