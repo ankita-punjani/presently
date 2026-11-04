@@ -137,7 +137,7 @@ const SYNONYMS: Record<string, string[]> = {
   luxury: ["luxury"], luxurious: ["luxury"], fancy: ["luxury"], designer: ["luxury", "fashion"], expensive: ["luxury"],
   perfume: ["perfume"], fragrance: ["perfume"], cologne: ["perfume"], scent: ["perfume"],
   massage: ["massage", "spa"], spa: ["spa", "massage", "self care"], relaxing: ["spa", "self care"],
-  electronic: ["tech"], gadget: ["tech"], tech: ["tech"], apple: ["tech"], phone: ["tech"],
+  electronic: ["tech"], tech: ["tech"], apple: ["tech"], phone: ["tech"],
   blazer: ["blazer", "fashion"], suit: ["blazer", "fashion"], formal: ["blazer", "fashion"],
   clothe: ["fashion"], clothing: ["fashion"], fashion: ["fashion"], style: ["fashion"], outfit: ["fashion"],
   dress: ["dress", "fashion"], zara: ["zara", "dress", "fashion"], shopping: ["fashion"],
@@ -147,6 +147,12 @@ const SYNONYMS: Record<string, string[]> = {
   business: ["travel", "luxury"], flight: ["travel"], flying: ["travel"], travel: ["travel"], traveling: ["travel"], trip: ["travel"], airport: ["travel"],
   gym: ["fitness"], fitness: ["fitness"], workout: ["fitness"], running: ["running", "fitness"], yoga: ["fitness", "self care"],
   tea: ["tea"], matcha: ["matcha", "tea"], coffee: ["coffee"], wine: ["wine"], gaming: ["gaming"], game: ["gaming", "games"],
+  wedding: ["wedding"], married: ["wedding"], marriage: ["wedding"], newlywed: ["wedding"], bride: ["wedding"], honeymoon: ["wedding", "travel"],
+  dessert: ["sweets", "baking"], sweet: ["sweets"], cake: ["baking", "sweets"], bake: ["baking"], baker: ["baking"], pastry: ["baking", "sweets"], chocolate: ["chocolate", "sweets"],
+  crochet: ["crochet", "crafts"], knit: ["crochet", "crafts"], knitting: ["crochet", "crafts"], yarn: ["crochet", "crafts"], craft: ["crafts"],
+  accessory: ["accessories", "jewelry"], accessorie: ["accessories", "jewelry"], jewelry: ["jewelry", "accessories"], jewellery: ["jewelry", "accessories"], bag: ["accessories"],
+  watch: ["watch"], wallet: ["wallet"], jacket: ["jacket"], coat: ["jacket"],
+  gadget: ["tech", "home gadget"], smart: ["home gadget", "tech"], home: ["home", "home gadget"],
   music: ["music"], vinyl: ["vinyl", "music"], reading: ["books"], book: ["books"], art: ["art"], plant: ["plants"], houseplant: ["plants"],
 };
 

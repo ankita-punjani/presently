@@ -117,6 +117,27 @@ describe("interests shape the results", () => {
   });
 });
 
+describe("new interests", () => {
+  const titles = (interests: string[], categories: string[], budgetId: string, giftFor = "no preference") =>
+    backupSuggestions({ ...answers, interests, categories, budgetId, giftFor, vibe: "sentimental" }).map((gift) => gift.title).join();
+
+  it("finds wedding gifts for someone who just got married", () => {
+    expect(titles(["just got married", "wedding"], ["Home & cozy", "Experiences"], "25-50", "her")).toMatch(/vow|champagne|date jar|monogram/i);
+  });
+
+  it("finds dessert and crochet gifts", () => {
+    expect(titles(["desserts"], ["Food & drink"], "25-50")).toMatch(/macaron|dessert|caramel|truffle|brulee/i);
+    expect(titles(["crochet"], ["Books & hobbies"], "25-50")).toMatch(/crochet|yarn|amigurumi/i);
+  });
+
+  it("finds accessories, watches, wallets, jackets and home gadgets", () => {
+    expect(titles(["accessories"], ["Clothes & accessories"], "25-50", "her")).toMatch(/necklace|scarf|earrings|clip/i);
+    expect(titles(["watches", "men wallets"], ["Clothes & accessories"], "100-300", "him")).toMatch(/watch|wallet/i);
+    expect(titles(["cool jackets"], ["Clothes & accessories"], "100-300", "him")).toMatch(/jacket/i);
+    expect(titles(["home gadgets"], ["Home & cozy", "Gaming & tech"], "50-100", "him")).toMatch(/air fryer|winder|doorbell|vacuum/i);
+  });
+});
+
 describe("shopping for him or her", () => {
   const titles = (giftFor: string) =>
     backupSuggestions({ ...answers, giftFor, interests: ["fashion", "luxury", "blazers"], categories: ["Clothes & accessories"], budgetId: "50-100" })
