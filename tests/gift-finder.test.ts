@@ -83,6 +83,12 @@ describe("AI ideas", () => {
     expect(parseIdeas('{"not":"a list"}', answers.categories)).toEqual([]);
   });
 
+  it("uses the AI's store when it's trusted, and the category's store otherwise", () => {
+    expect(ideaToSuggestion({ ...idea, store: "Barnes & Noble" }).link).toContain("barnesandnoble.com");
+    expect(ideaToSuggestion({ ...idea, store: "Sketchy Deals" }).store).toBe("Amazon");
+    expect(ideaToSuggestion({ ...idea, store: undefined }).store).toBe("Amazon");
+  });
+
   it("builds a shop link to a trusted store", () => {
     expect(isTrustedUrl(ideaToSuggestion(idea).link)).toBe(true);
   });

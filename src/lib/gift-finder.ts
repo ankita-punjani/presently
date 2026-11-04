@@ -1,6 +1,6 @@
 import { BACKUP_GIFTS } from "./backup-gifts";
 import { BUDGETS } from "./quiz-options";
-import { findStore, storeForCategory } from "./trusted-stores";
+import { TRUSTED_STORES, findStore, storeForCategory } from "./trusted-stores";
 
 export type QuizAnswers = {
   giftFor: string;
@@ -23,7 +23,7 @@ export type Suggestion = {
   searchTerms: string;
 };
 
-export type RawIdea = { title: string; whyItFits: string; price: number; category: string; searchTerms: string };
+export type RawIdea = { title: string; whyItFits: string; price: number; category: string; searchTerms: string; store?: string };
 
 // Free-tier models from Google's pricing page, best first. If one is busy, try the next.
 const MODELS = (process.env.GEMINI_MODELS ?? "gemini-3.6-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite")
@@ -50,7 +50,8 @@ export function buildPrompt(answers: QuizAnswers) {
     `Occasion: ${answers.occasion}`,
     `Vibe: ${answers.vibe}`,
     ...(answers.alreadyShown.length ? [`Don't repeat these: ${answers.alreadyShown.join("; ")}`] : []),
-    'For each gift give: title; whyItFits (one short warm sentence that speaks to the giver as "you"); price (a typical USD price, as a number); category (exactly one of the categories above); searchTerms (2 to 6 words to find it in an online store).',
+    `Store: the best place to buy it, exactly one of: ${TRUSTED_STORES.map((store) => store.name).join(", ")}.`,
+    'For each gift give: title; store; whyItFits (one short warm sentence that speaks to the giver as "you"); price (a typical USD price, as a number); category (exactly one of the categories above); searchTerms (2 to 6 words to find it in an online store).',
   ].join("\n");
 }
 
@@ -64,8 +65,9 @@ const RESPONSE_SCHEMA = {
       price: { type: "NUMBER" },
       category: { type: "STRING" },
       searchTerms: { type: "STRING" },
+      store: { type: "STRING", enum: TRUSTED_STORES.map((store) => store.name) },
     },
-    required: ["title", "whyItFits", "price", "category", "searchTerms"],
+    required: ["title", "whyItFits", "price", "category", "searchTerms", "store"],
   },
 };
 
@@ -134,8 +136,9 @@ export async function fetchAiIdeas(answers: QuizAnswers, apiKey: string, models 
   throw lastError;
 }
 
+// Use the AI's store only if it's on the trusted list. Otherwise use the category's store.
 export function ideaToSuggestion(idea: RawIdea): Suggestion {
-  const store = storeForCategory(idea.category);
+  const store = (idea.store && findStore(idea.store)) || storeForCategory(idea.category);
   return {
     title: idea.title,
     whyItFits: idea.whyItFits,
