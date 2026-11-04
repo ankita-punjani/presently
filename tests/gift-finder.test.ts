@@ -117,6 +117,22 @@ describe("interests shape the results", () => {
   });
 });
 
+describe("shopping for him or her", () => {
+  const titles = (giftFor: string) =>
+    backupSuggestions({ ...answers, giftFor, interests: ["fashion", "luxury", "blazers"], categories: ["Clothes & accessories"], budgetId: "50-100" })
+      .map((gift) => gift.title)
+      .join();
+
+  it("doesn't suggest cufflinks for her, or dresses for him", () => {
+    expect(titles("her")).not.toMatch(/cufflinks|pocket square/i);
+    expect(titles("him")).not.toMatch(/dress from Zara|earrings/i);
+  });
+
+  it("shows everything for 'them'", () => {
+    expect(titles("them")).toMatch(/cufflinks|pocket square|dress/i);
+  });
+});
+
 describe("every quiz combination gets a full set", () => {
   const categories = [...new Set(BACKUP_GIFTS.map((gift) => gift.category))];
 
