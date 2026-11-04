@@ -6,7 +6,7 @@ import type { SaveResult } from "@/app/quiz/actions";
 import type { Suggestion } from "@/lib/gift-finder";
 import { formatMoney } from "@/lib/format";
 import { giftEmoji } from "@/lib/gift-emoji";
-import { GiftImage } from "./GiftImage";
+import { GiftArt } from "./GiftArt";
 
 type Props = {
   suggestion: Suggestion;
@@ -24,7 +24,7 @@ export function SuggestionCard({ suggestion, emoji, onSave }: Props) {
 
   return (
     <article className="sticker flex h-full flex-col overflow-hidden transition hover:-rotate-1">
-      <GiftImage src={suggestion.imageUrl} alt={suggestion.title} emoji={giftEmoji(suggestion.title, emoji)} />
+      <GiftArt emoji={giftEmoji(suggestion.title, emoji)} category={suggestion.category} />
       <div className="flex flex-1 flex-col p-5">
         <h2 className="font-display text-xl font-bold leading-tight">{suggestion.title}</h2>
         <p className="mt-1 text-sm font-semibold">

@@ -10,6 +10,7 @@ import {
 import { BACKUP_GIFTS } from "@/lib/backup-gifts";
 import { BUDGETS } from "@/lib/quiz-options";
 import { findStore, isTrustedUrl } from "@/lib/trusted-stores";
+import { giftEmoji } from "@/lib/gift-emoji";
 
 const answers: QuizAnswers = {
   giftFor: "her",
@@ -205,5 +206,17 @@ describe("trusted links", () => {
     ["javascript:alert(1)", false],
   ])("%s → %s", (url, expected) => {
     expect(isTrustedUrl(url)).toBe(expected);
+  });
+});
+
+describe("gift art", () => {
+  it("every hand-picked gift has its own emoji, not just its category's", () => {
+    const missing = BACKUP_GIFTS.filter((gift) => giftEmoji(gift.title, "none") === "none").map((gift) => gift.title);
+    expect(missing).toEqual([]);
+  });
+
+  it("falls back to the category emoji for unknown titles", () => {
+    expect(giftEmoji("Ceremonial matcha starter kit", "🍫")).toBe("🍵");
+    expect(giftEmoji("Something unusual", "🎁")).toBe("🎁");
   });
 });

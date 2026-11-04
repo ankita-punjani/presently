@@ -1,4 +1,6 @@
 const EMOJI: [RegExp, string][] = [
+  [/gua sha|roller/i, "💎"], [/sunrise alarm/i, "🌅"], [/scrunchie/i, "🎀"], [/base layer/i, "🎽"], [/eye gel|patches/i, "👁️"],
+  [/framed print/i, "🖼️"], [/weekender/i, "🧳"], [/drunk elephant/i, "🐘"], [/charging stand/i, "🔋"], [/towel/i, "🛁"], [/cocotte/i, "💗"],
   [/sneaker|onitsuka|air force|samba|new balance|dunk|jordan|pegasus|chuck|laces/i, "👟"], [/gift finds/i, "🔎"],
   [/wedding|vow|bride|honeymoon|marriage|newlywed/i, "💍"], [/champagne flute/i, "🥂"], [/house portrait/i, "🏡"], [/decanter/i, "🥃"],
   [/macaron|dessert|caramel|brulee|cookie|truffle|ice cream|pastry|stand mixer/i, "🧁"], [/crochet|yarn|amigurumi/i, "🧶"],
