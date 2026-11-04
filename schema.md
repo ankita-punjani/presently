@@ -10,6 +10,7 @@ erDiagram
     users ||--o{ stars : gives
     users ||--o{ wishes : "wishes for"
     users ||--o| wishlist_shares : shares
+    users ||--o| calendar_feeds : syncs
     users ||--o{ quiz_runs : runs
     users ||--o{ sessions : "logged in on"
     users ||--o{ accounts : "signs in with"
@@ -123,6 +124,15 @@ A row here makes that user's wishlist public at `/w/<token>`.
 | token | text | Required, unique, random |
 | created_at | timestamp | |
 
+### calendar_feeds
+A row here publishes that user's birthdays as a private calendar at `/api/calendar/<token>.ics`, which Google, Apple or Outlook Calendar can subscribe to.
+
+| Column | Type | Notes |
+|---|---|---|
+| user_id | text | Primary key, foreign key → users |
+| token | text | Required, unique, random |
+| created_at | timestamp | |
+
 ## Supporting tables
 | Table | What it holds |
 |---|---|
@@ -142,6 +152,6 @@ A row here makes that user's wishlist public at `/w/<token>`.
 | stars | Yes | Matches the plan |
 | budgets | Yes | Also has `created_at` |
 | product_cache | Yes | Matches the plan |
-| Not in the plan | Added | `quiz_runs`, `wishes` and `wishlist_shares` |
+| Not in the plan | Added | `quiz_runs`, `wishes`, `wishlist_shares`, and `calendar_feeds` (from the stranger test) |
 
 The agent built what I designed, plus three tables the plan had missed.

@@ -253,7 +253,7 @@ The spine (#1–#8) and my 3 features (#9, #10, #11) are never cut.
 | #12 Real product photos + trusted links | Changed: photos cut, trusted links kept | Done | Don't ship what you can't verify, and let the person who uses it decide what looks right. | Built and tested with Serper, but the key was rejected live. When I saw the design, I preferred illustrated sticker art to store photos, so photos were removed and every gift got its own emoji art. Trusted store links stayed. |
 | #13 Continue with Google | Shipped | Backlogged until keys are added | Hide features that aren't configured. | The button stays hidden until Google keys are set. |
 | #14 Shareable wishlist | Changed | Done | A public page needs its own privacy check. | The plan had nowhere to store my own wishes, so `wishes` and `wishlist_shares` were added. |
-| #15 Birthday calendar | Shipped | Done | Feb 29 needs a rule. | Shows on Mar 1 in non-leap years, matching the countdown. |
+| #15 Birthday calendar | Changed: grew into calendar sync | Done | Feb 29 needs a rule. And people's birthdays already live in their contacts, so don't make them type them again. | My stranger test asked for Google Calendar sync. It now imports .vcf and .ics files and publishes a private feed that Google, Apple and Outlook can subscribe to. It's free, with no Google API approval, built in #81. |
 | #16 Gift roulette | Shipped | Done | Small features add personality. | Shows when a person has 2 or more unbought ideas. |
 | #17 Dark mode | Shipped | Done | Cream text on lime is unreadable. | Bright chips keep dark text. |
 | Design (Section 6) | Shipped | Done | Design is worth its own PR. | Added a landing page, a ticker and a 404 page. Nothing was cut. |
