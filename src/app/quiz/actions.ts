@@ -47,7 +47,7 @@ export async function findGiftsAction(input: QuizAnswers): Promise<QuizResult> {
       const ideas = await fetchAiIdeas(answers, apiKey);
       return { suggestions: ideas.map(ideaToSuggestion), source: "ai" };
     } catch (error) {
-      console.error("Gift finder fell back to the backup list:", error);
+      console.warn("Gift finder used the backup list:", String(error));
     }
   }
   return { suggestions: backupSuggestions(answers), source: "backup" };

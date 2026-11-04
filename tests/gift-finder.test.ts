@@ -58,7 +58,23 @@ describe("AI ideas", () => {
 
   it("throws on an API error, so the quiz can use the backup list", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("rate limited", { status: 429 })));
-    await expect(fetchAiIdeas(answers, "test-key")).rejects.toThrow("429");
+    await expect(fetchAiIdeas(answers, "test-key", ["only-model"])).rejects.toThrow("429");
+  });
+
+  it("tries the next model when one is busy", async () => {
+    const fetchMock = vi.fn<(url: string) => Promise<Response>>()
+      .mockResolvedValueOnce(new Response("high demand", { status: 503 }))
+      .mockResolvedValueOnce(geminiReply([idea]));
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await fetchAiIdeas(answers, "test-key", ["busy-model", "free-model"])).toEqual([idea]);
+    expect(fetchMock.mock.calls[1][0]).toContain("free-model");
+  });
+
+  it("stops at once on a bad key, rather than trying every model", async () => {
+    const fetchMock = vi.fn(async () => new Response("API key not valid", { status: 400 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(fetchAiIdeas(answers, "bad-key", ["a", "b", "c"])).rejects.toThrow("400");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("drops malformed ideas and categories that weren't picked", () => {

@@ -25,8 +25,13 @@ export type Suggestion = {
 
 export type RawIdea = { title: string; whyItFits: string; price: number; category: string; searchTerms: string };
 
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
-const TIMEOUT_MS = 8000;
+// Free-tier models from Google's pricing page, best first. If one is busy, try the next.
+const MODELS = (process.env.GEMINI_MODELS ?? "gemini-3.6-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite")
+  .split(",")
+  .map((model) => model.trim())
+  .filter(Boolean);
+const TIMEOUT_MS = 7000;
+const RETRYABLE = new Set([404, 429, 500, 503]);
 const RESULT_COUNT = 8;
 
 const budgetFor = (id: string) => BUDGETS.find((budget) => budget.id === id) ?? BUDGETS[1];
@@ -87,9 +92,9 @@ export function parseIdeas(text: string, categories: string[]): RawIdea[] {
     .slice(0, RESULT_COUNT);
 }
 
-export async function fetchAiIdeas(answers: QuizAnswers, apiKey: string) {
+async function askModel(model: string, answers: QuizAnswers, apiKey: string) {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
@@ -100,16 +105,33 @@ export async function fetchAiIdeas(answers: QuizAnswers, apiKey: string) {
       }),
     },
   );
-  // The reason helps tell a bad key from a bad request. It never contains the key.
-  if (!response.ok) throw new Error(`Gemini returned ${response.status}: ${(await response.text()).slice(0, 300)}`);
+  // The reason helps tell a bad key from a busy model. It never contains the key.
+  if (!response.ok) {
+    const error = new Error(`Gemini ${model} returned ${response.status}: ${(await response.text()).slice(0, 300)}`);
+    return { error, retry: RETRYABLE.has(response.status) };
+  }
 
   const body = await response.json();
   const text: string | undefined = body?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Gemini returned no text");
+  const ideas = text ? parseIdeas(text, answers.categories) : [];
+  if (ideas.length === 0) return { error: new Error(`Gemini ${model} returned no usable ideas`), retry: true };
+  return { ideas };
+}
 
-  const ideas = parseIdeas(text, answers.categories);
-  if (ideas.length === 0) throw new Error("Gemini returned no usable ideas");
-  return ideas;
+export async function fetchAiIdeas(answers: QuizAnswers, apiKey: string, models = MODELS) {
+  let lastError: Error = new Error("No Gemini models configured");
+  for (const model of models) {
+    try {
+      const result = await askModel(model, answers, apiKey);
+      if (result.ideas) return result.ideas;
+      lastError = result.error;
+      if (!result.retry) break;
+    } catch (error) {
+      // A timeout or network blip: try the next model.
+      lastError = error as Error;
+    }
+  }
+  throw lastError;
 }
 
 export function ideaToSuggestion(idea: RawIdea): Suggestion {
