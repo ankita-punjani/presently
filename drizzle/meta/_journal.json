@@ -71,6 +71,13 @@
       "when": 1793778194097,
       "tag": "0009_mece_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793778710164,
+      "tag": "0010_calendar_feeds",
+      "breakpoints": true
     }
   ]
 }

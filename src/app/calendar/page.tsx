@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { BirthdayImport } from "@/components/BirthdayImport";
+import { CalendarFeed } from "@/components/CalendarFeed";
+import { getFeedToken } from "@/db/queries/calendar";
 import { listPeople } from "@/db/queries/people";
 import { requireUser } from "@/lib/auth";
 import { birthdaysInMonth, monthCells, monthKey, parseMonth, todayString } from "@/lib/dates";
@@ -12,7 +16,9 @@ type Props = { searchParams: Promise<{ month?: string }> };
 export default async function CalendarPage({ searchParams }: Props) {
   const user = await requireUser();
   const { year, month } = parseMonth((await searchParams).month);
-  const people = await listPeople(user.id);
+  const [people, feedToken] = await Promise.all([listPeople(user.id), getFeedToken(user.id)]);
+  const host = (await headers()).get("host") ?? "localhost:3000";
+  const origin = `${host.startsWith("localhost") ? "http" : "https"}://${host}`;
 
   const birthdays = birthdaysInMonth(people, year, month);
   const today = todayString();
@@ -34,6 +40,11 @@ export default async function CalendarPage({ searchParams }: Props) {
           <Link href={`/calendar?month=${monthKey(year, month + 1)}`} className="btn-plain px-4 py-2" aria-label="Next month">→</Link>
         </nav>
       </div>
+
+      <section aria-label="Sync with your calendars" className="mt-6 grid gap-6 md:grid-cols-2">
+        <BirthdayImport />
+        <CalendarFeed token={feedToken} origin={origin} />
+      </section>
 
       <div className="sticker mt-6 p-2 sm:p-4">
         <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold sm:text-sm">
