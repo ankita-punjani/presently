@@ -12,12 +12,13 @@ import {
   updateIdea,
   type IdeaInput,
 } from "@/db/queries/gift-ideas";
+import { createPerson } from "@/db/queries/people";
 import { requireUser } from "@/lib/auth";
 import { todayString } from "@/lib/dates";
 import { OCCASIONS, STATUSES } from "@/lib/idea-options";
 import { cleanLink, readValues, validateIdea, type FormState } from "@/lib/validation";
 
-const FIELDS = ["title", "personId", "categoryId", "price", "occasion", "status", "store", "link", "notes"];
+const FIELDS = ["title", "personId", "newPersonName", "categoryId", "price", "occasion", "status", "store", "link", "notes"];
 
 const NOT_YOUR_PERSON = "Who’s this gift for? Pick someone from your list.";
 
@@ -38,6 +39,13 @@ function toInput(values: FormState["values"], previousBoughtOn: string | null): 
   };
 }
 
+// "Someone new" in the dropdown: create the person first, then save the idea for them.
+async function resolvePerson(userId: string, values: FormState["values"]) {
+  if (values.personId !== "new") return values;
+  const person = await createPerson(userId, { name: values.newPersonName });
+  return { ...values, personId: String(person.id) };
+}
+
 async function validate(values: FormState["values"]) {
   const errors = validateIdea(values);
   if (!errors.categoryId && !(await categoryExists(Number(values.categoryId)))) {
@@ -52,9 +60,9 @@ export async function createIdeaAction(_prev: FormState, form: FormData): Promis
   const errors = await validate(values);
   if (Object.keys(errors).length) return { errors, values };
 
-  const idea = await createIdea(user.id, toInput(values, null));
+  const idea = await createIdea(user.id, toInput(await resolvePerson(user.id, values), null));
   if (!idea) return { errors: { personId: NOT_YOUR_PERSON }, values };
-  revalidatePath("/ideas");
+  revalidatePath("/", "layout");
   redirect(`/ideas/${idea.id}`);
 }
 
@@ -67,16 +75,16 @@ export async function updateIdeaAction(id: number, _prev: FormState, form: FormD
   const errors = await validate(values);
   if (Object.keys(errors).length) return { errors, values };
 
-  const idea = await updateIdea(user.id, id, toInput(values, existing.idea.boughtOn));
+  const idea = await updateIdea(user.id, id, toInput(await resolvePerson(user.id, values), existing.idea.boughtOn));
   if (!idea) return { errors: { personId: NOT_YOUR_PERSON }, values };
-  revalidatePath("/ideas");
+  revalidatePath("/", "layout");
   redirect(`/ideas/${id}`);
 }
 
 export async function deleteIdeaAction(id: number) {
   const user = await requireUser();
   await deleteIdea(user.id, id);
-  revalidatePath("/ideas");
+  revalidatePath("/", "layout");
   redirect("/ideas");
 }
 

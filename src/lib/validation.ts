@@ -64,7 +64,12 @@ export function validateIdea(values: Values) {
   checkLength(errors, "title", values.title, 200, "That name");
   checkLength(errors, "store", values.store, 100, "That store name");
   checkLength(errors, "notes", values.notes, 2000, "That note");
-  if (!parseId(values.personId)) errors.personId = "Who’s this gift for? Pick someone.";
+  if (values.personId === "new") {
+    if (!values.newPersonName) errors.newPersonName = "Who’s it for? Type their name.";
+    checkLength(errors, "newPersonName", values.newPersonName ?? "", 100, "That name");
+  } else if (!parseId(values.personId)) {
+    errors.personId = "Who’s this gift for? Pick someone, or add someone new.";
+  }
   if (!parseId(values.categoryId)) errors.categoryId = "Pick a category so you can find it later.";
   checkMoney(errors, "price", values.price, "Price");
   if (values.link && !cleanLink(values.link)) {

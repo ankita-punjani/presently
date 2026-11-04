@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BirthdayChip } from "@/components/BirthdayChip";
+import { countIdeasByPerson } from "@/db/queries/gift-ideas";
 import { listPeople } from "@/db/queries/people";
 import { requireUser } from "@/lib/auth";
 import { daysUntilBirthday } from "@/lib/dates";
@@ -9,11 +10,18 @@ export const metadata = { title: "People · Presently 🎀" };
 
 const AVATAR_TINTS = ["bg-pink", "bg-tangerine", "bg-lime", "bg-lilac"];
 
+function ideaSummary(counts?: { total: number; bought: number }) {
+  if (!counts || counts.total === 0) return "💡 No ideas yet";
+  const ideas = `💡 ${counts.total} ${counts.total === 1 ? "idea" : "ideas"}`;
+  return counts.bought ? `${ideas} · 🛍️ ${counts.bought} bought` : ideas;
+}
+
 export default async function PeoplePage() {
   const user = await requireUser();
   // Soonest birthday first; anyone without a birthday goes last.
   const days = (birthday: string | null) => (birthday ? daysUntilBirthday(birthday) : Number.POSITIVE_INFINITY);
-  const people = (await listPeople(user.id)).toSorted((a, b) => days(a.birthday) - days(b.birthday));
+  const [unsorted, ideaCounts] = await Promise.all([listPeople(user.id), countIdeasByPerson(user.id)]);
+  const people = unsorted.toSorted((a, b) => days(a.birthday) - days(b.birthday));
 
   return (
     <div className="pt-6">
@@ -43,7 +51,10 @@ export default async function PeoplePage() {
                   {person.relationship}
                   {person.birthday && ` · 🎂 ${formatBirthday(person.birthday)}`}
                 </p>
-                <div className="mt-3"><BirthdayChip birthday={person.birthday} /></div>
+                <p className="mt-3 text-sm font-semibold">
+                  {ideaSummary(ideaCounts.get(person.id))}
+                </p>
+                <div className="mt-2"><BirthdayChip birthday={person.birthday} /></div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {splitInterests(person.interests).slice(0, 3).map((tag) => (
                     <span key={tag} className="rounded-full bg-lilac/40 px-3 py-0.5 text-sm font-medium">{tag}</span>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { IdeaRow } from "@/db/queries/gift-ideas";
 import type { Person } from "@/db/queries/people";
 import { OCCASIONS, STATUSES } from "@/lib/idea-options";
@@ -22,6 +22,8 @@ type Props = {
 export function IdeaForm({ action, people, categories, idea, personId, cancelHref, submitLabel }: Props) {
   const [{ errors, values }, formAction] = useActionState(action, EMPTY_FORM);
   const field = (id: string, extraClass?: string) => fieldProps(id, errors, extraClass);
+  const startingPerson = String(values.personId ?? idea?.personId ?? personId ?? (people.length === 0 ? "new" : ""));
+  const [addingPerson, setAddingPerson] = useState(startingPerson === "new");
 
   return (
     // key: remount after a failed save so selects show what was submitted too.
@@ -35,11 +37,20 @@ export function IdeaForm({ action, people, categories, idea, personId, cancelHre
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="personId" className="label">Who’s it for?</label>
-          <select {...field("personId")} defaultValue={values.personId ?? idea?.personId ?? personId ?? ""}>
+          <select {...field("personId")} defaultValue={startingPerson} onChange={(e) => setAddingPerson(e.target.value === "new")}>
             <option value="" disabled>Pick someone</option>
             {people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            <option value="new">➕ Someone new…</option>
           </select>
           <FieldError id="personId" message={errors.personId} />
+          {addingPerson && (
+            <div className="mt-2">
+              <label htmlFor="newPersonName" className="sr-only">New person’s name</label>
+              <input {...field("newPersonName")} placeholder="Their name" autoFocus defaultValue={values.newPersonName ?? ""} />
+              <FieldError id="newPersonName" message={errors.newPersonName} />
+              <p className="mt-1 text-sm text-ink/60">They’ll be added to your people. Fill in birthday and more later.</p>
+            </div>
+          )}
         </div>
         <div>
           <label htmlFor="categoryId" className="label">Category</label>

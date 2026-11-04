@@ -37,7 +37,7 @@ export async function createPersonAction(_prev: FormState, form: FormData): Prom
   if (Object.keys(errors).length) return { errors, values };
 
   const person = await createPerson(user.id, toInput(values));
-  revalidatePath("/people");
+  revalidatePath("/", "layout");
   redirect(`/people/${person.id}`);
 }
 
@@ -48,13 +48,13 @@ export async function updatePersonAction(id: number, _prev: FormState, form: For
   if (Object.keys(errors).length) return { errors, values };
 
   await updatePerson(user.id, id, toInput(values));
-  revalidatePath("/people");
+  revalidatePath("/", "layout");
   redirect(`/people/${id}`);
 }
 
 export async function deletePersonAction(id: number) {
   const user = await requireUser();
   await deletePerson(user.id, id);
-  revalidatePath("/people");
+  revalidatePath("/", "layout");
   redirect("/people");
 }
