@@ -29,7 +29,7 @@ const FEATURES = [
 const SAMPLE = [
   { emoji: "💆", title: "Theragun Mini massage gun", who: "For Adhi · $199", tilt: "-rotate-3", tint: "bg-lime/50" },
   { emoji: "🌸", title: "Tom Ford Oud Wood", who: "For Adhi · $98", tilt: "rotate-2", tint: "bg-pink/25" },
-  { emoji: "🌶️", title: "Masala dabba spice box", who: "For Bhavya · $32", tilt: "-rotate-1", tint: "bg-tangerine/30" },
+  { emoji: "🌶️", title: "Masala dabba spice box", who: "For Bhav · $32", tilt: "-rotate-1", tint: "bg-tangerine/30" },
 ];
 
 export default async function Home() {
