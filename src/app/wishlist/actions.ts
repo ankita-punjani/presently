@@ -17,19 +17,19 @@ export async function addWishAction(_prev: FormState, form: FormData): Promise<F
     price: values.price || null,
     notes: values.notes || null,
   });
-  revalidatePath("/wishlist");
+  revalidatePath("/", "layout");
   return EMPTY_FORM;
 }
 
 export async function deleteWishAction(id: number) {
   const user = await requireUser();
   await deleteWish(user.id, id);
-  revalidatePath("/wishlist");
+  revalidatePath("/", "layout");
 }
 
 export async function setSharingAction(on: boolean) {
   const user = await requireUser();
   if (on) await startSharing(user.id);
   else await stopSharing(user.id);
-  revalidatePath("/wishlist");
+  revalidatePath("/", "layout");
 }

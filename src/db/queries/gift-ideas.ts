@@ -141,3 +141,17 @@ export async function setStar(userId: string, giftIdeaId: number, starred: boole
     await db.insert(stars).values({ userId, giftIdeaId }).onConflictDoNothing();
   }
 }
+
+// For people cards: how many ideas each person has, and how many are bought or given.
+export async function countIdeasByPerson(userId: string) {
+  const rows = await db
+    .select({
+      personId: giftIdeas.personId,
+      total: sql<number>`count(*)::int`,
+      bought: sql<number>`count(*) filter (where ${giftIdeas.status} <> 'idea')::int`,
+    })
+    .from(giftIdeas)
+    .where(eq(giftIdeas.userId, userId))
+    .groupBy(giftIdeas.personId);
+  return new Map(rows.map((row) => [row.personId, row]));
+}
