@@ -168,7 +168,11 @@ function interestTags(interests: string[]) {
 export function backupSuggestions(answers: QuizAnswers, random = Math.random): Suggestion[] {
   const budget = budgetFor(answers.budgetId);
   const inCategories = BACKUP_GIFTS.filter(
-    (gift) => answers.categories.includes(gift.category) && gift.price <= budget.max,
+    (gift) =>
+      answers.categories.includes(gift.category) &&
+      gift.price <= budget.max &&
+      // "them" and "no preference" see everything. Otherwise skip gifts clearly for the other.
+      (!gift.for || !["him", "her"].includes(answers.giftFor) || gift.for === answers.giftFor),
   );
   const unseen = inCategories.filter((gift) => !answers.alreadyShown.includes(gift.title));
   // Once everything's been shown, start over rather than coming up empty.
