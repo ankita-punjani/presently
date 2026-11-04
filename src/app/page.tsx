@@ -57,7 +57,7 @@ export default async function Home() {
           The right <span className="text-pink">present</span>, right on time.
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-lg text-ink/70">
-          Save gift ideas for your people all year, and never panic-buy at the airport again.
+          Save gift ideas for your people all year, and never panic-buy the wrong gift again.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/signup" className="btn-pink px-7 py-3 text-lg">Start my list 🎁</Link>
